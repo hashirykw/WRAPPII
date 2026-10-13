@@ -1,0 +1,101 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/en/",
+      "destination": "/en",
+      "permanent": true
+    },
+    {
+      "source": "/en/:slug",
+      "destination": "/en-:slug",
+      "permanent": true
+    },
+    {
+      "source": "/about-us",
+      "destination": "/en-about-us",
+      "permanent": true
+    },
+    {
+      "source": "/car-wrapping",
+      "destination": "/en-car-wrapping",
+      "permanent": true
+    },
+    {
+      "source": "/contact",
+      "destination": "/en-contact",
+      "permanent": true
+    },
+    {
+      "source": "/prices",
+      "destination": "/en-prices",
+      "permanent": true
+    },
+    {
+      "source": "/projects",
+      "destination": "/en-projects",
+      "permanent": true
+    },
+    {
+      "source": "/wrap-studio",
+      "destination": "/en-wrap-studio",
+      "permanent": true
+    },
+    {
+      "source": "/polishing-and-ceramic-coating",
+      "destination": "/en-polishing-and-ceramic-coating",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/about",
+      "destination": "/om-oss",
+      "permanent": true
+    },
+    {
+      "source": "/wrap",
+      "destination": "/bilfoliering",
+      "permanent": true
+    },
+    {
+      "source": "/polish",
+      "destination": "/polering-og-keramisk-coating",
+      "permanent": true
+    },
+    {
+      "source": "/studio",
+      "destination": "/design-din-bil",
+      "permanent": true
+    },
+    {
+      "source": "/work",
+      "destination": "/prosjekter",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)\\.(webp|png|jpg|glb|woff2)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/(styles\\.css|site\\.js|studio\\.js|films\\.js)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=604800"
+        }
+      ]
+    }
+  ]
+}
