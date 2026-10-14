@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><base href="/"><title>Fant ikke siden | Wrappi</title><meta name="robots" content="noindex">
+<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file: 'wasm-unsafe-eval'; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data: blob:; font-src 'self' file:; connect-src 'self' file: blob: data:; worker-src 'self' blob:; media-src 'self'; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'"><base href="/"><title>Fant ikke siden | Wrappi</title><meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="favicon.png"><link rel="stylesheet" href="styles.css">
 <script type="application/json" id="wr-data">{"lang": "no", "page": "404", "routes": {"home": "./", "ppf": "ppf", "wrap": "bilfoliering", "polish": "polering-og-keramisk-coating", "studio": "design-din-bil", "work": "prosjekter", "prices": "priser", "about": "om-oss", "contact": "kontakt"}}</script><script src="boot.js"></script></head>
 <body class="pg-404"><svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -22,20 +22,25 @@
 <symbol id="v-top" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><rect x="7" y="2.8" width="10" height="18.4" rx="3"/><path d="M8.2 8.4c2.4-1 5.2-1 7.6 0M8.6 16.4c2.2.8 4.6.8 6.8 0"/></g></symbol>
 <symbol id="v-360" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.6 13.2A7.8 7.8 0 1 1 17.4 6.4"/><path d="M18.2 2.8v4.1h-4.1"/></g></symbol>
 <symbol id="i-drag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9 3 12l4 3M17 9l4 3-4 3M3 12h18"/></g></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
 </svg>
 
 <header class="nav" id="nav">
-  <a href="./" class="brand" aria-label="Wrappi forside"><img src="logo.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22"></a>
+  <a href="./" class="brand" aria-label="Wrappi forside"><img class="logo-l" src="logo.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22"><img class="logo-d" src="logo-dark.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22" loading="lazy"></a>
   <ul class="nav__links"><li class="dd"><button type="button" aria-expanded="false" aria-haspopup="true">Tjenester<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button><div class="dd__panel"><a href="ppf"><b>PPF og farget PPF</b><small>Lakkbeskyttelse, klar eller farget</small></a><a href="bilfoliering"><b>Bilfoliering</b><small>Fargebytte, chrome delete, firmabil</small></a><a href="polering-og-keramisk-coating"><b>Polering og keramisk</b><small>Full Shine · Koch Chemie</small></a></div></li><li><a href="design-din-bil">Design din bil</a></li><li><a href="prosjekter">Prosjekter</a></li><li><a href="priser">Priser</a></li><li><a href="om-oss">Om oss</a></li><li><a href="kontakt">Kontakt</a></li></ul>
   <div class="lang" role="group" aria-label="Språk"><a href="./" hreflang="nb" lang="nb" data-setlang="no" aria-current="true">NO</a><a href="en" hreflang="en" lang="en" data-setlang="en">EN</a></div>
+  <button class="nav__theme" type="button" data-theme-toggle aria-label="Bytt til lyst tema" data-l="Bytt til lyst tema" data-d="Bytt til mørkt tema"><svg class="i-sun"><use href="#i-sun"/></svg><svg class="i-moon"><use href="#i-moon"/></svg></button>
   <a href="priser#quote" class="btn btn--solid nav__cta mag"><span>Få pris</span></a>
   <a class="nav__wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener" aria-label="WhatsApp Wrappi"><svg><use href="#i-wa"/></svg></a>
   <button class="nav__burger" aria-label="Åpne meny" aria-expanded="false" aria-controls="menu"><span></span></button>
 </header>
+<div class="menu-scrim" id="menuScrim" hidden></div>
 <nav class="menu" id="menu" aria-label="Meny">
-  <a href="ppf"><span>PPF og farget PPF</span> <small>Klar og farget</small></a><a href="bilfoliering"><span>Bilfoliering</span> <small>3M · Avery · Hexis</small></a><a href="polering-og-keramisk-coating"><span>Polering og keramisk</span> <small>Full Shine · Koch Chemie</small></a><a href="design-din-bil"><span>Design din bil</span> <small>3D</small></a><a href="prosjekter"><span>Prosjekter</span> <small>Bilder</small></a><a href="priser"><span>Priser</span> <small>NOK</small></a><a href="om-oss"><span>Om oss</span> <small>Joanna · Anestis</small></a><a href="kontakt"><span>Kontakt</span> <small>Furuset</small></a>
+  <div class="menu__grid"><a href="ppf"><span>PPF og farget PPF</span> <small>Klar og farget</small></a><a href="bilfoliering"><span>Bilfoliering</span> <small>3M · Avery · Hexis</small></a><a href="polering-og-keramisk-coating"><span>Polering og keramisk</span> <small>Full Shine · Koch Chemie</small></a><a href="design-din-bil"><span>Design din bil</span> <small>3D</small></a><a href="prosjekter"><span>Prosjekter</span> <small>Bilder</small></a><a href="priser"><span>Priser</span> <small>NOK</small></a><a href="om-oss"><span>Om oss</span> <small>Joanna · Anestis</small></a><a href="kontakt"><span>Kontakt</span> <small>Furuset</small></a></div>
   <div class="menu__acts"><a class="btn btn--wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg><span>WhatsApp</span></a><a class="btn btn--ghost" href="tel:+4746228133"><svg><use href="#i-call"/></svg><span>Ring</span></a></div>
-  <p class="menu__addr mono">Strømsveien 324 · 1081 Oslo</p>
+  <div class="menu__foot"><p class="menu__addr mono">Strømsveien 324 · 1081 Oslo</p><button class="menu__theme" type="button" data-theme-toggle><svg class="i-sun"><use href="#i-sun"/></svg><svg class="i-moon"><use href="#i-moon"/></svg><span class="t-l">Lyst tema</span><span class="t-d">Mørkt tema</span></button></div>
 </nav>
 <main id="main"><section class="nf">
   <div class="wrap">

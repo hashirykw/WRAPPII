@@ -9,7 +9,9 @@
 <link rel="alternate" hreflang="nb" href="https://wrappi.no/kontakt">
 <link rel="alternate" hreflang="en" href="https://wrappi.no/en-contact">
 <link rel="alternate" hreflang="x-default" href="https://wrappi.no/kontakt">
-<meta name="theme-color" content="#0b0c0e">
+<meta name="theme-color" content="#0b0c0e" id="themeColor">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file: 'wasm-unsafe-eval'; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data: blob:; font-src 'self' file:; connect-src 'self' file: blob: data:; worker-src 'self' blob:; media-src 'self'; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Wrappi – Wrapping Art Design">
 <meta property="og:locale" content="en_GB">
@@ -48,21 +50,26 @@
 <symbol id="v-top" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><rect x="7" y="2.8" width="10" height="18.4" rx="3"/><path d="M8.2 8.4c2.4-1 5.2-1 7.6 0M8.6 16.4c2.2.8 4.6.8 6.8 0"/></g></symbol>
 <symbol id="v-360" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.6 13.2A7.8 7.8 0 1 1 17.4 6.4"/><path d="M18.2 2.8v4.1h-4.1"/></g></symbol>
 <symbol id="i-drag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9 3 12l4 3M17 9l4 3-4 3M3 12h18"/></g></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
 </svg>
 
 <a class="skip" href="#main">Skip to content</a>
 <header class="nav" id="nav">
-  <a href="en" class="brand" aria-label="Wrappi home"><img src="logo.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22"></a>
+  <a href="en" class="brand" aria-label="Wrappi home"><img class="logo-l" src="logo.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22"><img class="logo-d" src="logo-dark.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22" loading="lazy"></a>
   <ul class="nav__links"><li class="dd"><button type="button" aria-expanded="false" aria-haspopup="true">Services<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button><div class="dd__panel"><a href="en-ppf"><b>PPF & Color PPF</b><small>Paint protection, clear or coloured</small></a><a href="en-car-wrapping"><b>Car wrapping</b><small>Colour change, chrome delete, fleet</small></a><a href="en-polishing-and-ceramic-coating"><b>Polishing & ceramic</b><small>Full Shine · Koch Chemie</small></a></div></li><li><a href="en-wrap-studio">Wrap studio</a></li><li><a href="en-projects">Projects</a></li><li><a href="en-prices">Prices</a></li><li><a href="en-about-us">About us</a></li><li><a href="en-contact" aria-current="page" class="is-on">Contact</a></li></ul>
   <div class="lang" role="group" aria-label="Language"><a href="kontakt" hreflang="nb" lang="nb" data-setlang="no">NO</a><a href="en-contact" hreflang="en" lang="en" data-setlang="en" aria-current="true">EN</a></div>
+  <button class="nav__theme" type="button" data-theme-toggle aria-label="Switch to light theme" data-l="Switch to light theme" data-d="Switch to dark theme"><svg class="i-sun"><use href="#i-sun"/></svg><svg class="i-moon"><use href="#i-moon"/></svg></button>
   <a href="en-prices#quote" class="btn btn--solid nav__cta mag"><span>Get a price</span></a>
   <a class="nav__wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener" aria-label="WhatsApp Wrappi"><svg><use href="#i-wa"/></svg></a>
   <button class="nav__burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span></button>
 </header>
+<div class="menu-scrim" id="menuScrim" hidden></div>
 <nav class="menu" id="menu" aria-label="Menu">
-  <a href="en-ppf"><span>PPF & Color PPF</span> <small>Clear & coloured</small></a><a href="en-car-wrapping"><span>Car wrapping</span> <small>3M · Avery · Hexis</small></a><a href="en-polishing-and-ceramic-coating"><span>Polishing & ceramic</span> <small>Full Shine · Koch Chemie</small></a><a href="en-wrap-studio"><span>Wrap studio</span> <small>3D</small></a><a href="en-projects"><span>Projects</span> <small>Photos</small></a><a href="en-prices"><span>Prices</span> <small>NOK</small></a><a href="en-about-us"><span>About us</span> <small>Joanna · Anestis</small></a><a href="en-contact"><span>Contact</span> <small>Furuset</small></a>
+  <div class="menu__grid"><a href="en-ppf"><span>PPF & Color PPF</span> <small>Clear & coloured</small></a><a href="en-car-wrapping"><span>Car wrapping</span> <small>3M · Avery · Hexis</small></a><a href="en-polishing-and-ceramic-coating"><span>Polishing & ceramic</span> <small>Full Shine · Koch Chemie</small></a><a href="en-wrap-studio"><span>Wrap studio</span> <small>3D</small></a><a href="en-projects"><span>Projects</span> <small>Photos</small></a><a href="en-prices"><span>Prices</span> <small>NOK</small></a><a href="en-about-us"><span>About us</span> <small>Joanna · Anestis</small></a><a href="en-contact"><span>Contact</span> <small>Furuset</small></a></div>
   <div class="menu__acts"><a class="btn btn--wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg><span>WhatsApp</span></a><a class="btn btn--ghost" href="tel:+4746228133"><svg><use href="#i-call"/></svg><span>Call</span></a></div>
-  <p class="menu__addr mono">Strømsveien 324 · 1081 Oslo</p>
+  <div class="menu__foot"><p class="menu__addr mono">Strømsveien 324 · 1081 Oslo</p><button class="menu__theme" type="button" data-theme-toggle><svg class="i-sun"><use href="#i-sun"/></svg><svg class="i-moon"><use href="#i-moon"/></svg><span class="t-l">Light theme</span><span class="t-d">Dark theme</span></button></div>
 </nav>
 <main id="main">
 <!-- PAGE HEADER -->
@@ -126,21 +133,26 @@
 
 </main>
 <footer class="foot">
-  <div class="foot__big" aria-hidden="true">WRAPPI</div>
   <div class="foot__rule" aria-hidden="true"><i></i><b>Drive different</b><i></i></div>
-  <div class="wrap">
-    <div class="foot__grid">
-      <div class="foot__about"><p>Paint protection film, Color PPF, car wrapping, polishing, ceramic coating and window tint at Strømsveien 324, 1081 Oslo.</p>
-        <div class="acts"><a class="btn btn--wa btn--sm js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg><span>WhatsApp</span></a><a class="btn btn--ghost btn--sm" href="https://www.instagram.com/wrappi__/" target="_blank" rel="noopener"><svg><use href="#i-ig"/></svg><span>@wrappi__</span></a></div></div>
-      <div class="foot__col"><span class="mono">Services</span><a href="en-ppf">PPF & Color PPF</a><a href="en-car-wrapping">Car wrapping</a><a href="en-polishing-and-ceramic-coating">Polishing & ceramic</a><a href="en-wrap-studio">Wrap studio</a></div>
-      <div class="foot__col"><span class="mono">Wrappi</span><a href="en-projects">Projects</a><a href="en-prices">Prices</a><a href="en-about-us">About us</a><a href="en-contact">Contact</a></div>
-      <div class="foot__col"><span class="mono">Visit</span><span>Strømsveien 324<br>1081 Oslo · Furuset</span><a href="tel:+4746228133">+47 462 28 133</a><a href="tel:+4746361675">+47 463 61 675</a></div>
+  <div class="wrap foot__in">
+    <div class="foot__top">
+      <a class="foot__brand" href="en" aria-label="Wrappi home"><img class="logo-l" src="logo.webp" alt="Wrappi" width="141" height="22" loading="lazy"><img class="logo-d" src="logo-dark.webp" alt="Wrappi" width="141" height="22" loading="lazy"></a>
+      <p class="foot__about">PPF, Color PPF, car wrapping, polishing, ceramic coating and window tint · Strømsveien 324, 1081 Oslo</p>
+      <div class="foot__acts">
+        <a class="ibtn ibtn--wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-wa"/></svg></a>
+        <a class="ibtn" href="https://www.instagram.com/wrappi__/" target="_blank" rel="noopener" aria-label="Instagram @wrappi__"><svg><use href="#i-ig"/></svg></a>
+        <a class="ibtn" href="tel:+4746228133" aria-label="Call +47 462 28 133"><svg><use href="#i-call"/></svg></a>
+      </div>
     </div>
-    <div class="foot__legal mono"><span>© <span class="yr">2026</span> Wrappi · Wrapping Art Design · Oslo</span>
-      <a href="https://nexlyr.solutions" target="_blank" rel="noopener">Site by Nexlyr Solutions</a>
+    <nav class="foot__nav" aria-label="Footer"><a href="en-ppf">PPF & Color PPF</a><a href="en-car-wrapping">Car wrapping</a><a href="en-polishing-and-ceramic-coating">Polishing & ceramic</a><a href="en-wrap-studio">Wrap studio</a><a href="en-projects">Projects</a><a href="en-prices">Prices</a><a href="en-about-us">About us</a><a href="en-contact">Contact</a></nav>
+    <div class="foot__legal mono">
+      <span>© <span class="yr">2026</span> Wrappi · Oslo</span>
+      <button type="button" class="foot__link" data-consent-open>Cookies & privacy</button>
       <details class="credits"><summary>3D car credits</summary>
         <ul><li><b>Tesla Model 3</b><span><a href="https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f" target="_blank" rel="noopener">“Tesla 2018 Model 3”</a> by Ameer Studio · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Volvo S90</b><span><a href="https://sketchfab.com/3d-models/volvo-s90-recharge-free-9462b07c10244fd4a28d86846dc9e3a9" target="_blank" rel="noopener">“Volvo S90 Recharge (Free)”</a> by lazercar · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Mercedes E-Class</b><span><a href="https://sketchfab.com/3d-models/mercedes-e-class-w212-119c5e10733142b197aa53b86f6aeb04" target="_blank" rel="noopener">“Mercedes E Class W212”</a> by Peter_D · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Porsche 911</b><span><a href="https://sketchfab.com/3d-models/free-porsche-911-carrera-4s-d01b254483794de3819786d93e0e1ebf" target="_blank" rel="noopener">“(FREE) Porsche 911 Carrera 4S”</a> by Karol Miklas · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></span></li><li><b>Audi R8</b><span><a href="https://sketchfab.com/3d-models/audi-r8-e17e438f076f4427a58d93aa779edaed" target="_blank" rel="noopener">“Audi R8”</a> by wallon · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Tesla Model Y</b><span><a href="https://sketchfab.com/3d-models/2021-tesla-model-y-59e2ead369984b1a85c800ff6cf6789d" target="_blank" rel="noopener">“2021 Tesla Model Y”</a> by tonielpro520 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Range Rover Sport</b><span><a href="https://sketchfab.com/3d-models/2023-land-rover-range-rover-sport-7d8bd24688b54c31a05d7b1a1f850145" target="_blank" rel="noopener">“2023 Land Rover Range Rover Sport”</a> by tonielpro520 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li></ul>
-        <p>Adapted for the web: compressed, badges and number plates removed.</p></details></div>
+        <p>Adapted for the web: compressed, badges and number plates removed.</p></details>
+      <a href="https://nexlyr.solutions" target="_blank" rel="noopener">Site by Nexlyr Solutions</a>
+    </div>
   </div>
 </footer>
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
@@ -150,6 +162,18 @@
   <button class="lb__btn lb__next" aria-label="Next photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="popH" hidden>
+  <div class="pop__scrim" data-pop-close></div>
+  <div class="pop__box">
+    <div class="pop__grab" aria-hidden="true"></div>
+    <div class="pop__head"><div><span class="mono" id="popK"></span><h3 id="popH"></h3></div><button class="pop__x" type="button" data-pop-close aria-label="Close"><svg><use href="#i-x"/></svg></button></div>
+    <div class="pop__body" id="popB"></div>
+  </div>
+</div>
+<div class="consent" id="consent" role="region" aria-label="Cookies" hidden>
+  <div class="consent__t"><b>Remember your build?</b><p>No tracking, no ad cookies. Say yes and this browser keeps the car and colour you last tried in the 3D studio and what you filled in in the price builder, so you can pick up where you left off. Theme and language are remembered either way.</p></div>
+  <div class="consent__acts"><button class="btn btn--ghost btn--sm" type="button" data-consent="no"><span>No thanks</span></button><button class="btn btn--solid btn--sm" type="button" data-consent="yes"><span>Yes, remember</span></button></div>
+</div>
 <button class="bot-fab" id="botFab" aria-expanded="false" aria-controls="bot"><span class="bot-fab__label">Ask Wrappi</span><img src="favicon.png" alt=""></button>
 <section class="bot" id="bot" role="dialog" aria-label="Wrappi assistant">
   <header class="bot__head"><img src="favicon.png" alt="">

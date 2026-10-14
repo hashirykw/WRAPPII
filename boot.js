@@ -5,6 +5,12 @@
   html.classList.add('js', 'wr-pre');
   setTimeout(function () { html.classList.remove('wr-pre'); }, 2500);
 
+  /* theme: the visitor's own choice (light / dark), set before anything is painted so there's no flash */
+  var th = null; try { th = localStorage.getItem('wrappi-theme'); } catch (e) {}
+  if (th !== 'light' && th !== 'dark') th = 'dark';
+  html.setAttribute('data-theme', th);
+  var mc = document.getElementById('themeColor'); if (mc) mc.setAttribute('content', th === 'light' ? '#f3f2ee' : '#0b0c0e');
+
   var cfg = document.getElementById('wr-data');
   try { window.WR = JSON.parse(cfg ? cfg.textContent : '{}'); } catch (e) { window.WR = { lang: 'no', routes: {} }; }
 
