@@ -40,6 +40,7 @@ const nf = n => Math.round(n).toLocaleString(LANG === 'no' ? 'nb-NO' : 'en-GB');
 const nok = n => 'NOK ' + nf(n);
 const wa = t => `https://wa.me/${WRAPPI.wa}?text=${encodeURIComponent(t)}`;
 const R = k => WR.routes[k] || './';
+const own = (o, k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k);
 
 /* language preference: remember the last choice so the home page opens in it next time */
 $$('[data-setlang]').forEach(a => a.addEventListener('click', () => { try { localStorage.setItem('wrappi-lang', a.dataset.setlang); } catch (e) {} }));
@@ -71,18 +72,51 @@ $$('.yr').forEach(y => y.textContent = new Date().getFullYear());
 /* toast */
 window.wrToast = t => { const el = $('#toast'); if (!el) return; el.textContent = t; el.classList.add('is-on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('is-on'), 2600); };
 
+/* ---------- cookie bar + what we remember (only with a yes) ---------- */
+const STORE = (() => {
+  const K = { consent: 'wrappi-consent', build: 'wrappi-build', quote: 'wrappi-quote' };
+  const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const set = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  const del = k => { try { localStorage.removeItem(k); } catch (e) {} };
+  const ok = () => get(K.consent) === 'yes';
+  return {
+    ok, answered: () => !!get(K.consent),
+    setConsent(v) { set(K.consent, v ? 'yes' : 'no'); if (!v) { del(K.build); del(K.quote); } dispatchEvent(new CustomEvent('wr-consent', { detail: v })); },
+    save(name, obj) { if (!ok() || !K[name]) return; try { set(K[name], JSON.stringify({ v: 1, t: Date.now(), d: obj })); } catch (e) {} },
+    load(name) { if (!ok() || !K[name]) return null; try { const o = JSON.parse(get(K[name]) || 'null'); return o && o.v === 1 && o.d && typeof o.d === 'object' ? o.d : null; } catch (e) { return null; } }
+  };
+})();
+window.wrStore = STORE;
+
 /* ---------- menu + services dropdown ---------- */
-const burger = $('.nav__burger'), menu = $('#menu');
+const burger = $('.nav__burger'), menu = $('#menu'), scrim = $('#menuScrim');
 function setMenu(open) {
   if (!burger) return;
   burger.setAttribute('aria-expanded', open); menu.classList.toggle('is-open', open);
   burger.setAttribute('aria-label', open ? tx('Close menu', 'Lukk meny') : tx('Open menu', 'Åpne meny'));
+  if (scrim) { if (open) { scrim.hidden = false; requestAnimationFrame(() => scrim.classList.add('is-on')); } else { scrim.classList.remove('is-on'); setTimeout(() => { if (!menu.classList.contains('is-open')) scrim.hidden = true; }, 300); } }
+  const nav = $('#nav'); if (nav && open) nav.classList.remove('is-hidden');
   if (window.lenis) open ? lenis.stop() : lenis.start();
 }
 if (burger) {
   burger.addEventListener('click', () => setMenu(burger.getAttribute('aria-expanded') !== 'true'));
   $$('a', menu).forEach(a => a.addEventListener('click', () => setMenu(false)));
+  if (scrim) scrim.addEventListener('click', () => setMenu(false));
+  addEventListener('resize', () => { if (innerWidth > 1180 && menu.classList.contains('is-open')) setMenu(false); });
 }
+
+/* ---------- light / dark theme: the visitor's own choice, remembered on this device ---------- */
+const themeBtns = $$('[data-theme-toggle]');
+const themeLabel = () => { const light = document.documentElement.dataset.theme === 'light'; $$('.nav__theme').forEach(b => b.setAttribute('aria-label', light ? b.dataset.d : b.dataset.l)); $$('[data-theme-toggle]').forEach(b => b.setAttribute('aria-pressed', light)); };
+themeLabel();
+themeBtns.forEach(b => b.addEventListener('click', () => {
+  const html = document.documentElement, next = html.dataset.theme === 'light' ? 'dark' : 'light';
+  html.classList.add('theme-anim'); html.dataset.theme = next;
+  const mc = $('#themeColor'); if (mc) mc.setAttribute('content', next === 'light' ? '#f3f2ee' : '#0b0c0e');
+  try { localStorage.setItem('wrappi-theme', next); } catch (e) {}
+  themeLabel(); setTimeout(() => html.classList.remove('theme-anim'), 520);
+  dispatchEvent(new CustomEvent('wr-theme', { detail: next }));
+}));
 $$('.dd').forEach(dd => {
   const b = $('button', dd);
   const set = o => { dd.classList.toggle('is-open', o); b.setAttribute('aria-expanded', o); };
@@ -238,7 +272,18 @@ $$('[data-filmcount]').forEach(el => { const F = window.FILMS; if (F) el.textCon
 const qBox = $('#quote');
 if (qBox) {
   const Q = { size: 'mid', svc: new Set(), when: 0 };
-  const pre = new URLSearchParams(location.search).get('svc'); if (pre && WRAPPI.services[pre]) Q.svc.add(pre);
+  const pre = new URLSearchParams(location.search).get('svc'); if (own(WRAPPI.services, pre)) Q.svc.add(pre);
+  /* with a yes in the cookie bar, the builder opens the way the visitor left it (each field checked before use) */
+  const saved = STORE.load('quote');
+  if (saved) {
+    if (own(WRAPPI.sizes, saved.size)) Q.size = saved.size;
+    if (!pre && Array.isArray(saved.svc)) saved.svc.filter(k => own(WRAPPI.services, k)).slice(0, 6).forEach(k => Q.svc.add(k));
+    if (Number.isInteger(saved.when) && saved.when >= 0 && saved.when < 3) Q.when = saved.when;
+    if (typeof saved.car === 'string') $('#qCar').value = saved.car.slice(0, 50);
+    if (typeof saved.name === 'string') $('#qName').value = saved.name.slice(0, 40);
+  }
+  let saveT; const saveQuote = () => { clearTimeout(saveT); saveT = setTimeout(() => STORE.save('quote', { size: Q.size, svc: [...Q.svc], when: Q.when, car: $('#qCar').value.trim().slice(0, 50), name: $('#qName').value.trim().slice(0, 40) }), 400); };
+  addEventListener('wr-consent', e => { if (e.detail) saveQuote(); });
   const WHEN = [['As soon as possible', 'Så snart som mulig'], ['November or December', 'November eller desember'], ['Just checking prices', 'Sjekker bare priser']];
   const priceOf = s => s.p === 'size:ppf' ? WRAPPI.sizes[Q.size].ppf : s.p === 'size:color' ? WRAPPI.sizes[Q.size].color : s.p;
   const quoteUI = () => {
@@ -259,6 +304,7 @@ if (qBox) {
     const car = $('#qCar').value.trim(), name = $('#qName').value.trim(), sz = WRAPPI.sizes[Q.size];
     const msg = [tx("Hi Wrappi! I'd like a price.", 'Hei Wrappi! Jeg vil gjerne ha en pris.'), `${tx('Car', 'Bil')}: ${car || tx('(make & model)', '(merke og modell)')} · ${tx(sz.en, sz.no)}`, `${tx('Services', 'Tjenester')}: ${list.length ? list.map(s => tx(s.en, s.no)).join(', ') : tx('(not sure yet)', '(usikker ennå)')}`, `${tx('When', 'Når')}: ${tx(...WHEN[Q.when])}`, name ? `— ${name}` : ''].filter(Boolean).join('\n');
     $('#bubble').textContent = msg; $('#qWa').href = $('#qbarWa').href = wa(msg); $('#qbarV').textContent = $('#estV').textContent;
+    saveQuote();
   };
   $('#sizePicks').addEventListener('click', e => { const b = e.target.closest('[data-sz]'); if (b) { Q.size = b.dataset.sz; quoteUI(); } });
   $('#svcPicks').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; const v = b.dataset.v, g = WRAPPI.services[v].g; if (Q.svc.has(v)) Q.svc.delete(v); else { if (g) [...Q.svc].forEach(k => { if (WRAPPI.services[k].g === g) Q.svc.delete(k); }); Q.svc.add(v); } renderQuote(); });
@@ -270,6 +316,8 @@ if (qBox) {
   quoteUI();
 }
 const heroCtas = $('.hero__ctas'); if (heroCtas) new IntersectionObserver(es => es.forEach(e => document.body.classList.toggle('hero-cta', e.isIntersecting))).observe(heroCtas);
+/* the floating assistant steps aside at the very bottom so it never covers the footer's last line */
+const footLegal = $('.foot__legal'); if (footLegal) new IntersectionObserver(es => es.forEach(e => document.body.classList.toggle('foot-on', e.isIntersecting))).observe(footLegal);
 
 /* ---------- assistant: rule-based, Wrappi's own facts only ---------- */
 (() => {
@@ -332,6 +380,77 @@ const refit = () => { fitHeads(); if (window.ScrollTrigger) ScrollTrigger.refres
 if (document.fonts) { document.fonts.ready.then(refit); document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', refit); }
 addEventListener('load', refit);
 { let fT, fW = innerWidth; addEventListener('resize', () => { if (innerWidth === fW) return; fW = innerWidth; clearTimeout(fT); fT = setTimeout(fitHeads, 150); }); }
+
+/* ---------- detail pop-ups: long card content opens in a sheet (phones) instead of stretching the page ---------- */
+(() => {
+  const pop = $('#pop'); if (!pop) return;
+  const body = $('#popB'), head = $('#popH'), kick = $('#popK'), box = $('.pop__box', pop);
+  let from = null, closeT = null;
+  const open = card => {
+    from = document.activeElement; clearTimeout(closeT);
+    const h = card.querySelector('h1,h2,h3,h4');
+    const hc = h ? h.cloneNode(true) : null; if (hc) $$('small,.sr-only', hc).forEach(x => x.remove());
+    head.textContent = card.dataset.popTitle || (hc ? hc.textContent.replace(/\s+/g, ' ').trim() : '');
+    const k = card.querySelector('.step__n,.founder__role,.covx__head .mono,.tag');
+    kick.textContent = card.dataset.popKicker || (k ? k.textContent.trim() : '');
+    body.textContent = '';
+    $$('[data-more]', card).forEach(n => { const c = n.cloneNode(true); c.removeAttribute('data-more'); c.removeAttribute('id'); $$('[id]', c).forEach(x => x.removeAttribute('id')); c.classList.remove('rv'); c.style.removeProperty('opacity'); c.style.removeProperty('transform'); body.appendChild(c); });
+    if (card.classList.contains('tier')) { const pr = card.querySelector('.tier__p'); if (pr) { const d = document.createElement('p'); d.className = 'pop__price'; d.textContent = [...pr.childNodes].map(n => n.textContent.trim()).filter(Boolean).join(' '); body.prepend(d); } }
+    pop.hidden = false; requestAnimationFrame(() => pop.classList.add('is-on'));
+    document.documentElement.classList.add('pop-open'); if (window.lenis) lenis.stop();
+    setTimeout(() => $('.pop__x', pop).focus({ preventScroll: true }), 30);
+  };
+  const close = () => {
+    if (pop.hidden) return;
+    pop.classList.remove('is-on'); document.documentElement.classList.remove('pop-open'); if (window.lenis) lenis.start();
+    closeT = setTimeout(() => { pop.hidden = true; body.textContent = ''; box.style.transform = ''; }, 380);
+    if (from && from.focus) from.focus({ preventScroll: true });
+  };
+  window.wrPop = { open, close };
+  $$('[data-pop-close]', pop).forEach(b => b.addEventListener('click', close));
+  pop.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); close(); }
+    if (e.key === 'Tab') { const f = $$('button,a[href],input,summary,[tabindex]:not([tabindex="-1"])', box).filter(x => x.offsetParent); if (!f.length) return; const a = f[0], z = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); } else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); } }
+  });
+  /* drag the sheet down to close it */
+  let dy0 = null;
+  $$('.pop__grab,.pop__head', pop).forEach(h => {
+    h.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; dy0 = e.clientY; box.style.transition = 'none'; h.setPointerCapture(e.pointerId); });
+    h.addEventListener('pointermove', e => { if (dy0 === null) return; box.style.transform = `translateY(${Math.max(0, e.clientY - dy0)}px)`; });
+    const end = e => { if (dy0 === null) return; const d = e.clientY - dy0; dy0 = null; box.style.transition = ''; if (d > 90) close(); else box.style.transform = ''; };
+    h.addEventListener('pointerup', end); h.addEventListener('pointercancel', end);
+  });
+  $$('[data-pop]').forEach(card => {
+    const more = $('[data-more]', card); if (!more) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'pop-btn'; b.setAttribute('aria-haspopup', 'dialog'); b.setAttribute('aria-controls', 'pop');
+    const sp = document.createElement('span'); sp.textContent = card.dataset.popLabel || tx('Details', 'Detaljer'); b.appendChild(sp);
+    b.insertAdjacentHTML('beforeend', '<svg aria-hidden="true"><use href="#i-plus"/></svg>');
+    more.before(b);
+    b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); open(card); });
+    if (card.hasAttribute('data-pop-tap')) card.addEventListener('click', e => { if (e.target.closest('a,button,input,summary')) return; if (getComputedStyle(b).display === 'none') return; open(card); });
+  });
+})();
+
+
+(() => {
+  const bar = $('#consent'); if (!bar) return;
+  const show = () => { bar.hidden = false; document.body.classList.add('consent-on'); requestAnimationFrame(() => requestAnimationFrame(() => bar.classList.add('is-on'))); };
+  const hide = () => { bar.classList.remove('is-on'); document.body.classList.remove('consent-on'); setTimeout(() => { bar.hidden = true; }, 500); };
+  $$('[data-consent]', bar).forEach(b => b.addEventListener('click', () => { STORE.setConsent(b.dataset.consent === 'yes'); hide(); if (window.wrToast) wrToast(b.dataset.consent === 'yes' ? tx('Done — your next build will be waiting for you.', 'Greit — neste bygg venter på deg.') : tx('Okay — nothing is saved.', 'Greit — ingenting lagres.')); }));
+  $$('[data-consent-open]').forEach(b => b.addEventListener('click', show));
+  if (!STORE.answered()) setTimeout(show, 1800);
+})();
+
+/* ---------- home: the 3D engine loads once the page is up, so the first view is instant ---------- */
+(() => {
+  const src = document.body.dataset.lazy3d; if (!src) return;
+  const go = () => { if (go.done) return; go.done = true; const s = document.createElement('script'); s.src = src; s.async = true; document.body.appendChild(s); };
+  const idle = window.requestIdleCallback || (f => setTimeout(f, 300));
+  const start = () => idle(go, { timeout: 1500 });
+  document.readyState === 'complete' ? start() : addEventListener('load', start, { once: true });
+  ['pointerdown', 'keydown', 'scroll'].forEach(t => addEventListener(t, () => setTimeout(go, 200), { once: true, passive: true }));
+})();
 
 /* ════════ motion (GSAP + Lenis). Without them the page still works, just still. ════════ */
 const pre = () => document.documentElement.classList.remove('wr-pre');

@@ -9,7 +9,9 @@
 <link rel="alternate" hreflang="nb" href="https://wrappi.no/ppf">
 <link rel="alternate" hreflang="en" href="https://wrappi.no/en-ppf">
 <link rel="alternate" hreflang="x-default" href="https://wrappi.no/ppf">
-<meta name="theme-color" content="#0b0c0e">
+<meta name="theme-color" content="#0b0c0e" id="themeColor">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file: 'wasm-unsafe-eval'; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data: blob:; font-src 'self' file:; connect-src 'self' file: blob: data:; worker-src 'self' blob:; media-src 'self'; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Wrappi – Wrapping Art Design">
 <meta property="og:locale" content="nb_NO">
@@ -48,21 +50,26 @@
 <symbol id="v-top" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><rect x="7" y="2.8" width="10" height="18.4" rx="3"/><path d="M8.2 8.4c2.4-1 5.2-1 7.6 0M8.6 16.4c2.2.8 4.6.8 6.8 0"/></g></symbol>
 <symbol id="v-360" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.6 13.2A7.8 7.8 0 1 1 17.4 6.4"/><path d="M18.2 2.8v4.1h-4.1"/></g></symbol>
 <symbol id="i-drag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9 3 12l4 3M17 9l4 3-4 3M3 12h18"/></g></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
 </svg>
 
 <a class="skip" href="#main">Hopp til innhold</a>
 <header class="nav" id="nav">
-  <a href="./" class="brand" aria-label="Wrappi forside"><img src="logo.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22"></a>
+  <a href="./" class="brand" aria-label="Wrappi forside"><img class="logo-l" src="logo.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22"><img class="logo-d" src="logo-dark.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22" loading="lazy"></a>
   <ul class="nav__links"><li class="dd"><button type="button" aria-expanded="false" aria-haspopup="true" class="is-on">Tjenester<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button><div class="dd__panel"><a href="ppf"><b>PPF og farget PPF</b><small>Lakkbeskyttelse, klar eller farget</small></a><a href="bilfoliering"><b>Bilfoliering</b><small>Fargebytte, chrome delete, firmabil</small></a><a href="polering-og-keramisk-coating"><b>Polering og keramisk</b><small>Full Shine · Koch Chemie</small></a></div></li><li><a href="design-din-bil">Design din bil</a></li><li><a href="prosjekter">Prosjekter</a></li><li><a href="priser">Priser</a></li><li><a href="om-oss">Om oss</a></li><li><a href="kontakt">Kontakt</a></li></ul>
   <div class="lang" role="group" aria-label="Språk"><a href="ppf" hreflang="nb" lang="nb" data-setlang="no" aria-current="true">NO</a><a href="en-ppf" hreflang="en" lang="en" data-setlang="en">EN</a></div>
+  <button class="nav__theme" type="button" data-theme-toggle aria-label="Bytt til lyst tema" data-l="Bytt til lyst tema" data-d="Bytt til mørkt tema"><svg class="i-sun"><use href="#i-sun"/></svg><svg class="i-moon"><use href="#i-moon"/></svg></button>
   <a href="priser#quote" class="btn btn--solid nav__cta mag"><span>Få pris</span></a>
   <a class="nav__wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener" aria-label="WhatsApp Wrappi"><svg><use href="#i-wa"/></svg></a>
   <button class="nav__burger" aria-label="Åpne meny" aria-expanded="false" aria-controls="menu"><span></span></button>
 </header>
+<div class="menu-scrim" id="menuScrim" hidden></div>
 <nav class="menu" id="menu" aria-label="Meny">
-  <a href="ppf"><span>PPF og farget PPF</span> <small>Klar og farget</small></a><a href="bilfoliering"><span>Bilfoliering</span> <small>3M · Avery · Hexis</small></a><a href="polering-og-keramisk-coating"><span>Polering og keramisk</span> <small>Full Shine · Koch Chemie</small></a><a href="design-din-bil"><span>Design din bil</span> <small>3D</small></a><a href="prosjekter"><span>Prosjekter</span> <small>Bilder</small></a><a href="priser"><span>Priser</span> <small>NOK</small></a><a href="om-oss"><span>Om oss</span> <small>Joanna · Anestis</small></a><a href="kontakt"><span>Kontakt</span> <small>Furuset</small></a>
+  <div class="menu__grid"><a href="ppf"><span>PPF og farget PPF</span> <small>Klar og farget</small></a><a href="bilfoliering"><span>Bilfoliering</span> <small>3M · Avery · Hexis</small></a><a href="polering-og-keramisk-coating"><span>Polering og keramisk</span> <small>Full Shine · Koch Chemie</small></a><a href="design-din-bil"><span>Design din bil</span> <small>3D</small></a><a href="prosjekter"><span>Prosjekter</span> <small>Bilder</small></a><a href="priser"><span>Priser</span> <small>NOK</small></a><a href="om-oss"><span>Om oss</span> <small>Joanna · Anestis</small></a><a href="kontakt"><span>Kontakt</span> <small>Furuset</small></a></div>
   <div class="menu__acts"><a class="btn btn--wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg><span>WhatsApp</span></a><a class="btn btn--ghost" href="tel:+4746228133"><svg><use href="#i-call"/></svg><span>Ring</span></a></div>
-  <p class="menu__addr mono">Strømsveien 324 · 1081 Oslo</p>
+  <div class="menu__foot"><p class="menu__addr mono">Strømsveien 324 · 1081 Oslo</p><button class="menu__theme" type="button" data-theme-toggle><svg class="i-sun"><use href="#i-sun"/></svg><svg class="i-moon"><use href="#i-moon"/></svg><span class="t-l">Lyst tema</span><span class="t-d">Mørkt tema</span></button></div>
 </nav>
 <main id="main">
 <!-- PAGE HEADER -->
@@ -77,7 +84,7 @@
       <ul class="phead__facts mono"><li><b>Opptil 10 år</b>garanti</li><li><b>216 µm</b>film</li><li><b>3–4</b>dager</li></ul>
     </div>
     <div class="phead__media" data-lb-group>
-      <figure class="m1" data-lb="ba-explorer-after.webp"><img src="ba-explorer-after.webp" alt="Svart Ford Explorer etter PPF på hele bilen"></figure>
+      <figure class="m1" data-lb="ba-explorer-after.webp"><img fetchpriority="high" decoding="async" src="ba-explorer-after.webp" alt="Svart Ford Explorer etter PPF på hele bilen"></figure>
       <figure class="m2" data-lb="installer-front-ppf.webp"><img src="installer-front-ppf.webp" alt="Front PPF monteres på en Mercedes"></figure>
       <figure class="m3" data-lb="modely-ppf.webp"><img src="modely-ppf.webp" alt="Svart Tesla Model Y inne for PPF"></figure>
     </div>
@@ -93,11 +100,11 @@
       <figure class="media" data-lb="modely-ppf.webp"><img src="modely-ppf.webp" alt="Svart Tesla Model Y inne for PPF" loading="lazy"></figure>
       <figure class="media" data-lb="ba-explorer-after.webp"><img src="ba-explorer-after.webp" alt="Ford Explorer etter PPF" loading="lazy"></figure>
     </div>
-    <div class="spanel__info">
+    <div class="spanel__info" data-pop data-pop-label="Priser og detaljer">
       <span class="tag"><span class="dot"></span>Selvhelende film</span>
       <h2 id="what-h" class="h-xl">Hva PPF gjør<small>Klar lakkbeskyttelsesfilm over hele bilen eller fronten.</small></h2>
       <p>Beskytter mot steinsprut, riper og daglig slitasje – og beholder bilens glans. Toppcoaten er selvhelende, så lette merker i filmen lukker seg igjen.</p>
-      <dl class="dl">
+      <dl class="dl" data-more>
         <div><dt>Front PPF</dt><dd>fra NOK 12 900<small>Hele panseret, frontfanger, begge forskjermene, begge A-stolpene, begge sidespeilene og frontlyktene</small></dd></div>
         <div><dt>Hel bil</dt><dd>NOK 30 000 – fra 45 000<small>Etter størrelse — se under</small></dd></div>
         <div><dt>Garanti</dt><dd>Opptil 10 år<small>Produsentgaranti på film og montering</small></dd></div>
@@ -114,31 +121,31 @@
     <p class="rv">De fleste steinsprut treffer fronten. Front PPF dekker panelene som tar støyten; PPF på hele bilen dekker alle lakkerte paneler. Snu bilen i studioet og se nøyaktig hvor filmen går.</p>
   </div>
   <div class="covx">
-    <article class="covx__card rv">
+    <article class="covx__card rv" data-pop data-pop-label="Hva som dekkes">
       <div class="covx__head"><span class="mono">01</span><h3>Front PPF</h3><b class="covx__p"><small>fra</small> 12 900 <sub>kr</sub></b></div>
-      <ul class="covers"><li>Hele panseret</li><li>Frontfanger</li><li>Begge forskjermene</li><li>Begge A-stolpene</li><li>Begge sidespeilene</li><li>Frontlyktene</li></ul>
+      <ul class="covers" data-more><li>Hele panseret</li><li>Frontfanger</li><li>Begge forskjermene</li><li>Begge A-stolpene</li><li>Begge sidespeilene</li><li>Frontlyktene</li></ul>
       <a class="btn btn--ghost btn--sm" href="design-din-bil?mode=ppf"><span>Vis meg i 3D</span></a>
     </article>
-    <article class="covx__card covx__card--full rv">
+    <article class="covx__card covx__card--full rv" data-pop data-pop-label="Hva som er med">
       <div class="covx__head"><span class="mono">02</span><h3>Hel bil</h3><b class="covx__p">30 000 – 45 000 <sub>kr</sub></b></div>
-      <ul class="covers"><li>Alle lakkerte paneler</li><li>Selvhelende film hele veien rundt</li><li>Opptil 10 års garanti</li><li>Også som farget PPF</li></ul>
+      <ul class="covers" data-more><li>Alle lakkerte paneler</li><li>Selvhelende film hele veien rundt</li><li>Opptil 10 års garanti</li><li>Også som farget PPF</li></ul>
       <a class="btn btn--solid btn--sm" href="priser?svc=ppfFull#quote"><span>Pris bilen min</span></a>
     </article>
   </div>
   <div style="margin-top:clamp(36px,5vw,56px)"><div class="board-wrap">
     <div class="board-head rv"><h3>PPF · hel bil</h3><span class="mono">Full beskyttelse · opptil 10 års garanti</span></div>
     <div class="board">
-      <div class="tier" style="--tc:#3fae6a"><h3>Små biler</h3><div class="tier__p"><span class="cnt" data-v="30000">30 000</span><sub>kr</sub></div><ul><li>VW ID.3</li><li>MG4</li><li>Nissan Leaf</li><li>Hyundai IONIQ 5</li><li>Kia Niro EV</li><li>Mini Cooper SE</li></ul></div>
-      <div class="tier" style="--tc:var(--color-blue)"><h3>Mellomstore</h3><div class="tier__p"><span class="cnt" data-v="33000">33 000</span><sub>kr</sub></div><ul><li>Tesla Model 3</li><li>Polestar 2</li><li>BMW i4</li><li>Audi A4 / S4</li><li>Mercedes C-Class</li><li>Volvo S60 / V60</li></ul></div>
-      <div class="tier" style="--tc:var(--color-gold)"><h3>Store biler / SUV</h3><div class="tier__p"><span class="cnt" data-v="36000">36 000</span><sub>kr</sub></div><ul><li>XPENG G6</li><li>Toyota bZ4X</li><li>VW ID.4</li><li>Audi Q4 e-tron</li><li>Skoda Enyaq</li><li>Mercedes EQC</li></ul></div>
-      <div class="tier" style="--tc:var(--color-glow)"><h3>XL / varebiler</h3><div class="tier__p"><small>fra</small><span class="cnt" data-v="45000">45 000</span><sub>kr</sub></div><ul><li>XPENG G9</li><li>VW ID. Buzz</li><li>VW Transporter</li><li>Mercedes Vito / eVito</li><li>Ford Transit Custom</li><li>Mercedes Sprinter</li></ul></div>
+      <div class="tier" style="--tc:#3fae6a" data-pop data-pop-tap data-pop-label="Eksempler"><h3>Små biler</h3><div class="tier__p"><span class="cnt" data-v="30000">30 000</span><sub>kr</sub></div><ul data-more><li>VW ID.3</li><li>MG4</li><li>Nissan Leaf</li><li>Hyundai IONIQ 5</li><li>Kia Niro EV</li><li>Mini Cooper SE</li></ul></div>
+      <div class="tier" style="--tc:var(--color-blue)" data-pop data-pop-tap data-pop-label="Eksempler"><h3>Mellomstore</h3><div class="tier__p"><span class="cnt" data-v="33000">33 000</span><sub>kr</sub></div><ul data-more><li>Tesla Model 3</li><li>Polestar 2</li><li>BMW i4</li><li>Audi A4 / S4</li><li>Mercedes C-Class</li><li>Volvo S60 / V60</li></ul></div>
+      <div class="tier" style="--tc:var(--color-gold)" data-pop data-pop-tap data-pop-label="Eksempler"><h3>Store biler / SUV</h3><div class="tier__p"><span class="cnt" data-v="36000">36 000</span><sub>kr</sub></div><ul data-more><li>XPENG G6</li><li>Toyota bZ4X</li><li>VW ID.4</li><li>Audi Q4 e-tron</li><li>Skoda Enyaq</li><li>Mercedes EQC</li></ul></div>
+      <div class="tier" style="--tc:var(--color-glow)" data-pop data-pop-tap data-pop-label="Eksempler"><h3>XL / varebiler</h3><div class="tier__p"><small>fra</small><span class="cnt" data-v="45000">45 000</span><sub>kr</sub></div><ul data-more><li>XPENG G9</li><li>VW ID. Buzz</li><li>VW Transporter</li><li>Mercedes Vito / eVito</li><li>Ford Transit Custom</li><li>Mercedes Sprinter</li></ul></div>
     </div>
   </div>
 </div>
 </section>
 
 <section class="wrap sec" id="film" aria-labelledby="film-h" style="padding-top:0">
-  <div class="film__grid">
+  <div class="film__grid" data-pop data-pop-title="Tekniske data" data-pop-kicker="PPF Art Design Titanium" data-pop-label="Tekniske data">
     <div>
       <span class="tag rv"><span class="dot dot--blue"></span>Filmen vi bruker</span>
       <h2 id="film-h" class="split-lines" style="font-size:var(--text-2xl);margin:16px 0 22px">PPF Art Design<br><span class="out">Titanium.</span></h2>
@@ -151,7 +158,7 @@
         <div class="xsec__total"><span class="mono">Total tykkelse</span><b>8.8 mil · 216 µm</b></div>
       </div>
     </div>
-    <dl class="specs rv">
+    <dl class="specs rv" data-more>
       <div><dt>Strekkfasthet<small>MD / TD</small></dt><dd>≥ 50 MPa / ≥ 39 MPa</dd></div>
       <div><dt>Bruddforlengelse<small>Hvor langt den strekker seg</small></dt><dd>≥ 430 %</dd></div>
       <div><dt>Glansgrad<small>60°</small></dt><dd>≥ 112 GU</dd></div>
@@ -175,11 +182,11 @@
       <span class="chip" id="procChip">01 / 05</span>
     </div>
     <div class="steps">
-      <article class="step is-on"><span class="step__n">01</span><div><h3>Send oss bilen</h3><p>WhatsApp eller ring med bilmodell og hva du vil ha gjort. Vi gir deg pris og en dato, og du leverer bilen i Strømsveien 324.</p></div><img src="leaf-rose-shop.webp" alt="Wrappi sitt verksted i Strømsveien" loading="lazy"></article>
-      <article class="step"><span class="step__n">02</span><div><h3>Våtmontering</h3><p>PPF monteres vått med en spesialtilpasset monteringsvæske. Det gir oss tid til å plassere filmen nøyaktig og sikre et jevnt og presist resultat.</p></div><img src="installer-front-ppf.webp" alt="Film på vei på en front" loading="lazy"></article>
-      <article class="step"><span class="step__n">03</span><div><h3>20–24 arbeidstimer</h3><p>Selve monteringen tar ca. 20–24 arbeidstimer, avhengig av bil og hvor mye arbeid som kreves.</p></div><img src="rs5-mirror.webp" alt="Arbeid på et speil" loading="lazy"></article>
-      <article class="step"><span class="step__n">04</span><div><h3>Tørk og kontroll</h3><p>Etter montering trenger filmen rundt 24 timer for å tørke og stabilisere seg. Deretter kontrollerer vi kanter, detaljer og finish for å sikre at alt sitter som det skal.</p></div><img src="ba-explorer-before.webp" alt="Kanter teipet opp på en svart SUV" loading="lazy"></article>
-      <article class="step"><span class="step__n">05</span><div><h3>Henting</h3><p>Etter levering anbefaler vi at bilen ikke vaskes de første 48–72 timene.</p></div><img src="ba-explorer-after.webp" alt="Den ferdige SUV-en" loading="lazy"></article>
+      <article class="step is-on" data-pop data-pop-tap data-pop-label="Les"><span class="step__n">01</span><div><h3>Send oss bilen</h3><p data-more>WhatsApp eller ring med bilmodell og hva du vil ha gjort. Vi gir deg pris og en dato, og du leverer bilen i Strømsveien 324.</p></div><img data-more src="leaf-rose-shop.webp" alt="Wrappi sitt verksted i Strømsveien" loading="lazy"></article>
+      <article class="step" data-pop data-pop-tap data-pop-label="Les"><span class="step__n">02</span><div><h3>Våtmontering</h3><p data-more>PPF monteres vått med en spesialtilpasset monteringsvæske. Det gir oss tid til å plassere filmen nøyaktig og sikre et jevnt og presist resultat.</p></div><img data-more src="installer-front-ppf.webp" alt="Film på vei på en front" loading="lazy"></article>
+      <article class="step" data-pop data-pop-tap data-pop-label="Les"><span class="step__n">03</span><div><h3>20–24 arbeidstimer</h3><p data-more>Selve monteringen tar ca. 20–24 arbeidstimer, avhengig av bil og hvor mye arbeid som kreves.</p></div><img data-more src="rs5-mirror.webp" alt="Arbeid på et speil" loading="lazy"></article>
+      <article class="step" data-pop data-pop-tap data-pop-label="Les"><span class="step__n">04</span><div><h3>Tørk og kontroll</h3><p data-more>Etter montering trenger filmen rundt 24 timer for å tørke og stabilisere seg. Deretter kontrollerer vi kanter, detaljer og finish for å sikre at alt sitter som det skal.</p></div><img data-more src="ba-explorer-before.webp" alt="Kanter teipet opp på en svart SUV" loading="lazy"></article>
+      <article class="step" data-pop data-pop-tap data-pop-label="Les"><span class="step__n">05</span><div><h3>Henting</h3><p data-more>Etter levering anbefaler vi at bilen ikke vaskes de første 48–72 timene.</p></div><img data-more src="ba-explorer-after.webp" alt="Den ferdige SUV-en" loading="lazy"></article>
       <p class="quote-line rv"><span>Kvalitet tar tid.</span> Riktig herding gir et tryggere og mer holdbart resultat.</p>
     </div>
   </div>
@@ -200,11 +207,11 @@
 <!-- COLOR PPF -->
 <section class="wrap sec" id="color-ppf" aria-labelledby="cppf-h">
   <div class="spanel spanel--flip">
-    <div class="spanel__info">
+    <div class="spanel__info" data-pop data-pop-label="Priser og detaljer">
       <span class="tag"><span class="dot dot--blue"></span>Høstkampanje</span>
       <h2 id="cppf-h" class="h-xl">Farget PPF<small>Fargebytte og lakkbeskyttelse i ett.</small></h2>
       <p>En farget, selvhelende film over hele bilen. Unikt utseende i din favorittfarge, og lakken under blir bevart — med samme 10 års garanti som klar PPF.</p>
-      <dl class="dl">
+      <dl class="dl" data-more>
         <div><dt>Personbil</dt><dd>fra NOK 33 000<small>Tesla Model 3, VW ID.3, BMW i4</small></dd></div>
         <div><dt>SUV</dt><dd>fra NOK 38 000<small>Tesla Model Y, XPENG G6, Volvo EX40</small></dd></div>
         <div><dt>Varebil</dt><dd>fra NOK 45 000<small>VW ID. Buzz Cargo, VW Transporter, Mercedes Vito</small></dd></div>
@@ -233,9 +240,9 @@
   <div style="margin-top:clamp(40px,6vw,72px)"><div class="board-wrap">
     <div class="board-head rv"><h3>Farget PPF</h3><span class="camp"><span class="dot dot--blue"></span>Høstkampanje · booking for november og desember</span></div>
     <div class="board board--3">
-      <div class="tier"><h3>Personbil</h3><div class="tier__p"><small>fra</small><span class="cnt" data-v="33000">33 000</span><sub>kr</sub></div><ul><li>Tesla Model 3</li><li>VW ID.3</li><li>BMW i4</li></ul></div>
-      <div class="tier"><h3>SUV</h3><div class="tier__p"><small>fra</small><span class="cnt" data-v="38000">38 000</span><sub>kr</sub></div><ul><li>Tesla Model Y</li><li>XPENG G6</li><li>Volvo EX40</li></ul></div>
-      <div class="tier"><h3>Varebil</h3><div class="tier__p"><small>fra</small><span class="cnt" data-v="45000">45 000</span><sub>kr</sub></div><ul><li>VW ID. Buzz Cargo</li><li>VW Transporter</li><li>Mercedes Vito</li></ul></div>
+      <div class="tier" data-pop data-pop-tap data-pop-label="Eksempler"><h3>Personbil</h3><div class="tier__p"><small>fra</small><span class="cnt" data-v="33000">33 000</span><sub>kr</sub></div><ul data-more><li>Tesla Model 3</li><li>VW ID.3</li><li>BMW i4</li></ul></div>
+      <div class="tier" data-pop data-pop-tap data-pop-label="Eksempler"><h3>SUV</h3><div class="tier__p"><small>fra</small><span class="cnt" data-v="38000">38 000</span><sub>kr</sub></div><ul data-more><li>Tesla Model Y</li><li>XPENG G6</li><li>Volvo EX40</li></ul></div>
+      <div class="tier" data-pop data-pop-tap data-pop-label="Eksempler"><h3>Varebil</h3><div class="tier__p"><small>fra</small><span class="cnt" data-v="45000">45 000</span><sub>kr</sub></div><ul data-more><li>VW ID. Buzz Cargo</li><li>VW Transporter</li><li>Mercedes Vito</li></ul></div>
     </div>
   </div>
 </div>
@@ -268,21 +275,26 @@
 
 </main>
 <footer class="foot">
-  <div class="foot__big" aria-hidden="true">WRAPPI</div>
   <div class="foot__rule" aria-hidden="true"><i></i><b>Drive different</b><i></i></div>
-  <div class="wrap">
-    <div class="foot__grid">
-      <div class="foot__about"><p>PPF, farget PPF, bilfoliering, polering, keramisk coating og vindusfilm i Strømsveien 324, 1081 Oslo.</p>
-        <div class="acts"><a class="btn btn--wa btn--sm js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg><span>WhatsApp</span></a><a class="btn btn--ghost btn--sm" href="https://www.instagram.com/wrappi__/" target="_blank" rel="noopener"><svg><use href="#i-ig"/></svg><span>@wrappi__</span></a></div></div>
-      <div class="foot__col"><span class="mono">Tjenester</span><a href="ppf">PPF og farget PPF</a><a href="bilfoliering">Bilfoliering</a><a href="polering-og-keramisk-coating">Polering og keramisk</a><a href="design-din-bil">Design din bil</a></div>
-      <div class="foot__col"><span class="mono">Wrappi</span><a href="prosjekter">Prosjekter</a><a href="priser">Priser</a><a href="om-oss">Om oss</a><a href="kontakt">Kontakt</a></div>
-      <div class="foot__col"><span class="mono">Besøk</span><span>Strømsveien 324<br>1081 Oslo · Furuset</span><a href="tel:+4746228133">+47 462 28 133</a><a href="tel:+4746361675">+47 463 61 675</a></div>
+  <div class="wrap foot__in">
+    <div class="foot__top">
+      <a class="foot__brand" href="./" aria-label="Wrappi forside"><img class="logo-l" src="logo.webp" alt="Wrappi" width="141" height="22" loading="lazy"><img class="logo-d" src="logo-dark.webp" alt="Wrappi" width="141" height="22" loading="lazy"></a>
+      <p class="foot__about">PPF, farget PPF, bilfoliering, polering, keramisk coating og vindusfilm · Strømsveien 324, 1081 Oslo</p>
+      <div class="foot__acts">
+        <a class="ibtn ibtn--wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-wa"/></svg></a>
+        <a class="ibtn" href="https://www.instagram.com/wrappi__/" target="_blank" rel="noopener" aria-label="Instagram @wrappi__"><svg><use href="#i-ig"/></svg></a>
+        <a class="ibtn" href="tel:+4746228133" aria-label="Ring +47 462 28 133"><svg><use href="#i-call"/></svg></a>
+      </div>
     </div>
-    <div class="foot__legal mono"><span>© <span class="yr">2026</span> Wrappi · Wrapping Art Design · Oslo</span>
-      <a href="https://nexlyr.solutions" target="_blank" rel="noopener">Nettside av Nexlyr Solutions</a>
+    <nav class="foot__nav" aria-label="Bunnmeny"><a href="ppf">PPF og farget PPF</a><a href="bilfoliering">Bilfoliering</a><a href="polering-og-keramisk-coating">Polering og keramisk</a><a href="design-din-bil">Design din bil</a><a href="prosjekter">Prosjekter</a><a href="priser">Priser</a><a href="om-oss">Om oss</a><a href="kontakt">Kontakt</a></nav>
+    <div class="foot__legal mono">
+      <span>© <span class="yr">2026</span> Wrappi · Oslo</span>
+      <button type="button" class="foot__link" data-consent-open>Cookies og personvern</button>
       <details class="credits"><summary>3D-biler · kreditering</summary>
         <ul><li><b>Tesla Model 3</b><span><a href="https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f" target="_blank" rel="noopener">“Tesla 2018 Model 3”</a> av Ameer Studio · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Volvo S90</b><span><a href="https://sketchfab.com/3d-models/volvo-s90-recharge-free-9462b07c10244fd4a28d86846dc9e3a9" target="_blank" rel="noopener">“Volvo S90 Recharge (Free)”</a> av lazercar · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Mercedes E-klasse</b><span><a href="https://sketchfab.com/3d-models/mercedes-e-class-w212-119c5e10733142b197aa53b86f6aeb04" target="_blank" rel="noopener">“Mercedes E Class W212”</a> av Peter_D · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Porsche 911</b><span><a href="https://sketchfab.com/3d-models/free-porsche-911-carrera-4s-d01b254483794de3819786d93e0e1ebf" target="_blank" rel="noopener">“(FREE) Porsche 911 Carrera 4S”</a> av Karol Miklas · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></span></li><li><b>Audi R8</b><span><a href="https://sketchfab.com/3d-models/audi-r8-e17e438f076f4427a58d93aa779edaed" target="_blank" rel="noopener">“Audi R8”</a> av wallon · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Tesla Model Y</b><span><a href="https://sketchfab.com/3d-models/2021-tesla-model-y-59e2ead369984b1a85c800ff6cf6789d" target="_blank" rel="noopener">“2021 Tesla Model Y”</a> av tonielpro520 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Range Rover Sport</b><span><a href="https://sketchfab.com/3d-models/2023-land-rover-range-rover-sport-7d8bd24688b54c31a05d7b1a1f850145" target="_blank" rel="noopener">“2023 Land Rover Range Rover Sport”</a> av tonielpro520 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li></ul>
-        <p>Tilpasset for nettet: komprimert, merker og skilt fjernet.</p></details></div>
+        <p>Tilpasset for nettet: komprimert, merker og skilt fjernet.</p></details>
+      <a href="https://nexlyr.solutions" target="_blank" rel="noopener">Nettside av Nexlyr Solutions</a>
+    </div>
   </div>
 </footer>
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Bildevisning" hidden>
@@ -292,6 +304,18 @@
   <button class="lb__btn lb__next" aria-label="Neste bilde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="popH" hidden>
+  <div class="pop__scrim" data-pop-close></div>
+  <div class="pop__box">
+    <div class="pop__grab" aria-hidden="true"></div>
+    <div class="pop__head"><div><span class="mono" id="popK"></span><h3 id="popH"></h3></div><button class="pop__x" type="button" data-pop-close aria-label="Lukk"><svg><use href="#i-x"/></svg></button></div>
+    <div class="pop__body" id="popB"></div>
+  </div>
+</div>
+<div class="consent" id="consent" role="region" aria-label="Cookies" hidden>
+  <div class="consent__t"><b>Husk bygget ditt?</b><p>Ingen sporing, ingen annonsekapsler. Sier du ja, husker denne nettleseren bilen og fargen du prøvde sist i 3D-studioet og det du fylte inn i prisbyggeren, så du kan fortsette der du slapp. Tema og språk huskes uansett.</p></div>
+  <div class="consent__acts"><button class="btn btn--ghost btn--sm" type="button" data-consent="no"><span>Nei takk</span></button><button class="btn btn--solid btn--sm" type="button" data-consent="yes"><span>Ja, husk det</span></button></div>
+</div>
 <button class="bot-fab" id="botFab" aria-expanded="false" aria-controls="bot"><span class="bot-fab__label">Spør Wrappi</span><img src="favicon.png" alt=""></button>
 <section class="bot" id="bot" role="dialog" aria-label="Wrappi-assistent">
   <header class="bot__head"><img src="favicon.png" alt="">

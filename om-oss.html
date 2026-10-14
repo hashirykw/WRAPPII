@@ -9,7 +9,9 @@
 <link rel="alternate" hreflang="nb" href="https://wrappi.no/om-oss">
 <link rel="alternate" hreflang="en" href="https://wrappi.no/en-about-us">
 <link rel="alternate" hreflang="x-default" href="https://wrappi.no/om-oss">
-<meta name="theme-color" content="#0b0c0e">
+<meta name="theme-color" content="#0b0c0e" id="themeColor">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file: 'wasm-unsafe-eval'; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data: blob:; font-src 'self' file:; connect-src 'self' file: blob: data:; worker-src 'self' blob:; media-src 'self'; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Wrappi – Wrapping Art Design">
 <meta property="og:locale" content="nb_NO">
@@ -48,21 +50,26 @@
 <symbol id="v-top" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><rect x="7" y="2.8" width="10" height="18.4" rx="3"/><path d="M8.2 8.4c2.4-1 5.2-1 7.6 0M8.6 16.4c2.2.8 4.6.8 6.8 0"/></g></symbol>
 <symbol id="v-360" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.6 13.2A7.8 7.8 0 1 1 17.4 6.4"/><path d="M18.2 2.8v4.1h-4.1"/></g></symbol>
 <symbol id="i-drag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9 3 12l4 3M17 9l4 3-4 3M3 12h18"/></g></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
 </svg>
 
 <a class="skip" href="#main">Hopp til innhold</a>
 <header class="nav" id="nav">
-  <a href="./" class="brand" aria-label="Wrappi forside"><img src="logo.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22"></a>
+  <a href="./" class="brand" aria-label="Wrappi forside"><img class="logo-l" src="logo.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22"><img class="logo-d" src="logo-dark.webp" alt="Wrappi – Wrapping Art Design" width="141" height="22" loading="lazy"></a>
   <ul class="nav__links"><li class="dd"><button type="button" aria-expanded="false" aria-haspopup="true">Tjenester<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button><div class="dd__panel"><a href="ppf"><b>PPF og farget PPF</b><small>Lakkbeskyttelse, klar eller farget</small></a><a href="bilfoliering"><b>Bilfoliering</b><small>Fargebytte, chrome delete, firmabil</small></a><a href="polering-og-keramisk-coating"><b>Polering og keramisk</b><small>Full Shine · Koch Chemie</small></a></div></li><li><a href="design-din-bil">Design din bil</a></li><li><a href="prosjekter">Prosjekter</a></li><li><a href="priser">Priser</a></li><li><a href="om-oss" aria-current="page" class="is-on">Om oss</a></li><li><a href="kontakt">Kontakt</a></li></ul>
   <div class="lang" role="group" aria-label="Språk"><a href="om-oss" hreflang="nb" lang="nb" data-setlang="no" aria-current="true">NO</a><a href="en-about-us" hreflang="en" lang="en" data-setlang="en">EN</a></div>
+  <button class="nav__theme" type="button" data-theme-toggle aria-label="Bytt til lyst tema" data-l="Bytt til lyst tema" data-d="Bytt til mørkt tema"><svg class="i-sun"><use href="#i-sun"/></svg><svg class="i-moon"><use href="#i-moon"/></svg></button>
   <a href="priser#quote" class="btn btn--solid nav__cta mag"><span>Få pris</span></a>
   <a class="nav__wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener" aria-label="WhatsApp Wrappi"><svg><use href="#i-wa"/></svg></a>
   <button class="nav__burger" aria-label="Åpne meny" aria-expanded="false" aria-controls="menu"><span></span></button>
 </header>
+<div class="menu-scrim" id="menuScrim" hidden></div>
 <nav class="menu" id="menu" aria-label="Meny">
-  <a href="ppf"><span>PPF og farget PPF</span> <small>Klar og farget</small></a><a href="bilfoliering"><span>Bilfoliering</span> <small>3M · Avery · Hexis</small></a><a href="polering-og-keramisk-coating"><span>Polering og keramisk</span> <small>Full Shine · Koch Chemie</small></a><a href="design-din-bil"><span>Design din bil</span> <small>3D</small></a><a href="prosjekter"><span>Prosjekter</span> <small>Bilder</small></a><a href="priser"><span>Priser</span> <small>NOK</small></a><a href="om-oss"><span>Om oss</span> <small>Joanna · Anestis</small></a><a href="kontakt"><span>Kontakt</span> <small>Furuset</small></a>
+  <div class="menu__grid"><a href="ppf"><span>PPF og farget PPF</span> <small>Klar og farget</small></a><a href="bilfoliering"><span>Bilfoliering</span> <small>3M · Avery · Hexis</small></a><a href="polering-og-keramisk-coating"><span>Polering og keramisk</span> <small>Full Shine · Koch Chemie</small></a><a href="design-din-bil"><span>Design din bil</span> <small>3D</small></a><a href="prosjekter"><span>Prosjekter</span> <small>Bilder</small></a><a href="priser"><span>Priser</span> <small>NOK</small></a><a href="om-oss"><span>Om oss</span> <small>Joanna · Anestis</small></a><a href="kontakt"><span>Kontakt</span> <small>Furuset</small></a></div>
   <div class="menu__acts"><a class="btn btn--wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg><span>WhatsApp</span></a><a class="btn btn--ghost" href="tel:+4746228133"><svg><use href="#i-call"/></svg><span>Ring</span></a></div>
-  <p class="menu__addr mono">Strømsveien 324 · 1081 Oslo</p>
+  <div class="menu__foot"><p class="menu__addr mono">Strømsveien 324 · 1081 Oslo</p><button class="menu__theme" type="button" data-theme-toggle><svg class="i-sun"><use href="#i-sun"/></svg><svg class="i-moon"><use href="#i-moon"/></svg><span class="t-l">Lyst tema</span><span class="t-d">Mørkt tema</span></button></div>
 </nav>
 <main id="main">
 <!-- PAGE HEADER -->
@@ -75,7 +82,7 @@
       <p class="beats"><span>Lidenskap for biler.</span><span>Sans for detaljer.</span><span>Kvalitet i hvert eneste prosjekt.</span></p>
     </div>
     <div class="phead__media phead__media--one" data-lb-group>
-      <figure class="m1" data-lb="leaf-rose-shop.webp"><img src="leaf-rose-shop.webp" alt="Wrappi sitt verksted i Strømsveien 324 på Furuset"><figcaption class="chip">Strømsveien 324 · Furuset</figcaption></figure>
+      <figure class="m1" data-lb="leaf-rose-shop.webp"><img fetchpriority="high" decoding="async" src="leaf-rose-shop.webp" alt="Wrappi sitt verksted i Strømsveien 324 på Furuset"><figcaption class="chip">Strømsveien 324 · Furuset</figcaption></figure>
     </div>
   </div>
 </section>
@@ -98,20 +105,20 @@
     </div>
     <div class="duo__rule" aria-hidden="true"><i></i><b><img src="logo.webp" alt="" width="141" height="22"></b><i></i></div>
     <div class="duo__grid">
-      <article class="founder founder--r rv">
+      <article class="founder founder--r rv" data-pop data-pop-label="Les mer">
         <div class="founder__mono" aria-hidden="true">AL</div>
         <span class="mono founder__role">Håndverket og presisjonen</span>
         <h3>Anestis Lekas</h3>
-        <p>Anestis er den praktiske og tekniske drivkraften bak Wrappi. Med øye for detaljer, tålmodighet og høye krav til kvalitet sørger han for at hvert prosjekt blir utført med størst mulig presisjon.</p>
-        <p class="founder__q">For ham handler bilfoliering ikke bare om å montere folie, men om å skape et resultat som både ser fantastisk ut og varer.</p>
+        <p data-more>Anestis er den praktiske og tekniske drivkraften bak Wrappi. Med øye for detaljer, tålmodighet og høye krav til kvalitet sørger han for at hvert prosjekt blir utført med størst mulig presisjon.</p>
+        <p class="founder__q" data-more>For ham handler bilfoliering ikke bare om å montere folie, men om å skape et resultat som både ser fantastisk ut og varer.</p>
         <ul class="founder__tags"><li>Øye for detaljer</li><li>Tålmodighet</li><li>Høye krav til kvalitet</li></ul>
       </article>
-      <article class="founder founder--b rv">
+      <article class="founder founder--b rv" data-pop data-pop-label="Les mer">
         <div class="founder__mono" aria-hidden="true">JG</div>
         <span class="mono founder__role">Kreativitet og kundekontakt</span>
         <h3>Joanna Gonkiewicz</h3>
-        <p>Joanna står bak mye av planleggingen, organiseringen og utviklingen av Wrappi. Hun brenner for design, estetikk og gode kundeopplevelser.</p>
-        <p class="founder__q">Fra den første samtalen til bilen er klar for levering, er målet hennes at hver kunde skal føle seg trygg, ivaretatt og fornøyd med både prosessen og resultatet.</p>
+        <p data-more>Joanna står bak mye av planleggingen, organiseringen og utviklingen av Wrappi. Hun brenner for design, estetikk og gode kundeopplevelser.</p>
+        <p class="founder__q" data-more>Fra den første samtalen til bilen er klar for levering, er målet hennes at hver kunde skal føle seg trygg, ivaretatt og fornøyd med både prosessen og resultatet.</p>
         <ul class="founder__tags"><li>Design</li><li>Estetikk</li><li>Kundeopplevelser</li></ul>
       </article>
     </div>
@@ -192,21 +199,26 @@
 
 </main>
 <footer class="foot">
-  <div class="foot__big" aria-hidden="true">WRAPPI</div>
   <div class="foot__rule" aria-hidden="true"><i></i><b>Drive different</b><i></i></div>
-  <div class="wrap">
-    <div class="foot__grid">
-      <div class="foot__about"><p>PPF, farget PPF, bilfoliering, polering, keramisk coating og vindusfilm i Strømsveien 324, 1081 Oslo.</p>
-        <div class="acts"><a class="btn btn--wa btn--sm js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg><span>WhatsApp</span></a><a class="btn btn--ghost btn--sm" href="https://www.instagram.com/wrappi__/" target="_blank" rel="noopener"><svg><use href="#i-ig"/></svg><span>@wrappi__</span></a></div></div>
-      <div class="foot__col"><span class="mono">Tjenester</span><a href="ppf">PPF og farget PPF</a><a href="bilfoliering">Bilfoliering</a><a href="polering-og-keramisk-coating">Polering og keramisk</a><a href="design-din-bil">Design din bil</a></div>
-      <div class="foot__col"><span class="mono">Wrappi</span><a href="prosjekter">Prosjekter</a><a href="priser">Priser</a><a href="om-oss">Om oss</a><a href="kontakt">Kontakt</a></div>
-      <div class="foot__col"><span class="mono">Besøk</span><span>Strømsveien 324<br>1081 Oslo · Furuset</span><a href="tel:+4746228133">+47 462 28 133</a><a href="tel:+4746361675">+47 463 61 675</a></div>
+  <div class="wrap foot__in">
+    <div class="foot__top">
+      <a class="foot__brand" href="./" aria-label="Wrappi forside"><img class="logo-l" src="logo.webp" alt="Wrappi" width="141" height="22" loading="lazy"><img class="logo-d" src="logo-dark.webp" alt="Wrappi" width="141" height="22" loading="lazy"></a>
+      <p class="foot__about">PPF, farget PPF, bilfoliering, polering, keramisk coating og vindusfilm · Strømsveien 324, 1081 Oslo</p>
+      <div class="foot__acts">
+        <a class="ibtn ibtn--wa js-wa" href="https://wa.me/4746228133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-wa"/></svg></a>
+        <a class="ibtn" href="https://www.instagram.com/wrappi__/" target="_blank" rel="noopener" aria-label="Instagram @wrappi__"><svg><use href="#i-ig"/></svg></a>
+        <a class="ibtn" href="tel:+4746228133" aria-label="Ring +47 462 28 133"><svg><use href="#i-call"/></svg></a>
+      </div>
     </div>
-    <div class="foot__legal mono"><span>© <span class="yr">2026</span> Wrappi · Wrapping Art Design · Oslo</span>
-      <a href="https://nexlyr.solutions" target="_blank" rel="noopener">Nettside av Nexlyr Solutions</a>
+    <nav class="foot__nav" aria-label="Bunnmeny"><a href="ppf">PPF og farget PPF</a><a href="bilfoliering">Bilfoliering</a><a href="polering-og-keramisk-coating">Polering og keramisk</a><a href="design-din-bil">Design din bil</a><a href="prosjekter">Prosjekter</a><a href="priser">Priser</a><a href="om-oss">Om oss</a><a href="kontakt">Kontakt</a></nav>
+    <div class="foot__legal mono">
+      <span>© <span class="yr">2026</span> Wrappi · Oslo</span>
+      <button type="button" class="foot__link" data-consent-open>Cookies og personvern</button>
       <details class="credits"><summary>3D-biler · kreditering</summary>
         <ul><li><b>Tesla Model 3</b><span><a href="https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f" target="_blank" rel="noopener">“Tesla 2018 Model 3”</a> av Ameer Studio · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Volvo S90</b><span><a href="https://sketchfab.com/3d-models/volvo-s90-recharge-free-9462b07c10244fd4a28d86846dc9e3a9" target="_blank" rel="noopener">“Volvo S90 Recharge (Free)”</a> av lazercar · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Mercedes E-klasse</b><span><a href="https://sketchfab.com/3d-models/mercedes-e-class-w212-119c5e10733142b197aa53b86f6aeb04" target="_blank" rel="noopener">“Mercedes E Class W212”</a> av Peter_D · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Porsche 911</b><span><a href="https://sketchfab.com/3d-models/free-porsche-911-carrera-4s-d01b254483794de3819786d93e0e1ebf" target="_blank" rel="noopener">“(FREE) Porsche 911 Carrera 4S”</a> av Karol Miklas · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></span></li><li><b>Audi R8</b><span><a href="https://sketchfab.com/3d-models/audi-r8-e17e438f076f4427a58d93aa779edaed" target="_blank" rel="noopener">“Audi R8”</a> av wallon · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Tesla Model Y</b><span><a href="https://sketchfab.com/3d-models/2021-tesla-model-y-59e2ead369984b1a85c800ff6cf6789d" target="_blank" rel="noopener">“2021 Tesla Model Y”</a> av tonielpro520 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li><li><b>Range Rover Sport</b><span><a href="https://sketchfab.com/3d-models/2023-land-rover-range-rover-sport-7d8bd24688b54c31a05d7b1a1f850145" target="_blank" rel="noopener">“2023 Land Rover Range Rover Sport”</a> av tonielpro520 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span></li></ul>
-        <p>Tilpasset for nettet: komprimert, merker og skilt fjernet.</p></details></div>
+        <p>Tilpasset for nettet: komprimert, merker og skilt fjernet.</p></details>
+      <a href="https://nexlyr.solutions" target="_blank" rel="noopener">Nettside av Nexlyr Solutions</a>
+    </div>
   </div>
 </footer>
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Bildevisning" hidden>
@@ -216,6 +228,18 @@
   <button class="lb__btn lb__next" aria-label="Neste bilde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="popH" hidden>
+  <div class="pop__scrim" data-pop-close></div>
+  <div class="pop__box">
+    <div class="pop__grab" aria-hidden="true"></div>
+    <div class="pop__head"><div><span class="mono" id="popK"></span><h3 id="popH"></h3></div><button class="pop__x" type="button" data-pop-close aria-label="Lukk"><svg><use href="#i-x"/></svg></button></div>
+    <div class="pop__body" id="popB"></div>
+  </div>
+</div>
+<div class="consent" id="consent" role="region" aria-label="Cookies" hidden>
+  <div class="consent__t"><b>Husk bygget ditt?</b><p>Ingen sporing, ingen annonsekapsler. Sier du ja, husker denne nettleseren bilen og fargen du prøvde sist i 3D-studioet og det du fylte inn i prisbyggeren, så du kan fortsette der du slapp. Tema og språk huskes uansett.</p></div>
+  <div class="consent__acts"><button class="btn btn--ghost btn--sm" type="button" data-consent="no"><span>Nei takk</span></button><button class="btn btn--solid btn--sm" type="button" data-consent="yes"><span>Ja, husk det</span></button></div>
+</div>
 <button class="bot-fab" id="botFab" aria-expanded="false" aria-controls="bot"><span class="bot-fab__label">Spør Wrappi</span><img src="favicon.png" alt=""></button>
 <section class="bot" id="bot" role="dialog" aria-label="Wrappi-assistent">
   <header class="bot__head"><img src="favicon.png" alt="">
