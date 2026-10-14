@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://wrappi.no/sitemap.xml
+Sitemap: https://wrappii.vercel.app/sitemap.xml

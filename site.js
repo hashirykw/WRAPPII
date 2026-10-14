@@ -73,6 +73,10 @@ $$('.yr').forEach(y => y.textContent = new Date().getFullYear());
 /* toast */
 window.wrToast = t => { const el = $('#toast'); if (!el) return; el.textContent = t; el.classList.add('is-on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('is-on'), 2600); };
 
+/* ---------- the soft fade behind the floating bar shows once the page has moved ---------- */
+(() => { const h = document.documentElement; let t = false; const f = () => { t = false; h.classList.toggle('is-scrolled', scrollY > 24); };
+  addEventListener('scroll', () => { if (!t) { t = true; requestAnimationFrame(f); } }, { passive: true }); f(); })();
+
 /* ---------- cookie bar + what we remember (only with a yes) ---------- */
 const STORE = (() => {
   const K = { consent: 'wrappi-consent', build: 'wrappi-build', quote: 'wrappi-quote' };
