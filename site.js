@@ -374,19 +374,20 @@ function fitHeads() {
   hs.forEach((h, i) => { if (out[i]) h.style.fontSize = out[i]; });
   void root.offsetWidth; root.classList.remove('is-fitting');
 }
-fitHeads();
+/* headings are sized once the fonts are in (see the motion start below); later font loads (rare) size them again */
 let refitT = 0; const refit = () => { clearTimeout(refitT); refitT = setTimeout(() => { fitHeads(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }, 80); };
-if (document.fonts) { document.fonts.ready.then(refit); document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', refit); }
-addEventListener('load', refit);
 { let fT, fW = innerWidth; addEventListener('resize', () => { if (innerWidth === fW) return; fW = innerWidth; clearTimeout(fT); fT = setTimeout(fitHeads, 150); }); }
 
 /* ---------- detail pop-ups: long card content opens in a sheet (phones) instead of stretching the page ---------- */
 (() => {
   const pop = $('#pop'); if (!pop) return;
   const body = $('#popB'), head = $('#popH'), kick = $('#popK'), box = $('.pop__box', pop);
-  let from = null, closeT = null;
-  const open = card => {
-    from = document.activeElement; clearTimeout(closeT);
+  let from = null, src = null, anim = null, closing = false;
+  const phone = () => matchMedia('(max-width: 760px)').matches;
+  const SHEET = 'cubic-bezier(.32,.72,0,1)';   /* the curve phones use for sheets: quick off the mark, long soft landing */
+  const stop = () => { if (anim) { anim.forEach(a => a.cancel()); anim = null; } };
+  const open = (card, trigger) => {
+    from = document.activeElement; src = trigger || card; stop(); closing = false;
     const h = card.querySelector('h1,h2,h3,h4');
     const hc = h ? h.cloneNode(true) : null; if (hc) $$('small,.sr-only', hc).forEach(x => x.remove());
     head.textContent = card.dataset.popTitle || (hc ? hc.textContent.replace(/\s+/g, ' ').trim() : '');
@@ -406,29 +407,51 @@ addEventListener('load', refit);
     }
     [...head.parentNode.parentNode.children, ...body.children].forEach((n, i) => n.style.setProperty('--i', i));
     if (foot) foot.style.setProperty('--i', body.children.length + 2);
-    pop.hidden = false; requestAnimationFrame(() => pop.classList.add('is-on'));
+    pop.hidden = false; pop.classList.add('is-on'); box.style.transform = '';
     document.documentElement.classList.add('pop-open'); if (window.lenis) lenis.stop();
+    if (!RM && box.animate) {
+      const scrim = $('.pop__scrim', pop);
+      let k;
+      if (phone()) k = [{ transform: 'translateY(105%)' }, { transform: 'none' }];
+      else {   /* larger screens: the sheet grows out of the button that opened it */
+        const r = src.getBoundingClientRect(), b = box.getBoundingClientRect();
+        const dx = (r.left + r.width / 2) - (b.left + b.width / 2), dy = (r.top + r.height / 2) - (b.top + b.height / 2);
+        k = [{ transform: `translate(${dx}px,${dy}px) scale(.35)`, opacity: 0 }, { opacity: 1, offset: .35 }, { transform: 'none', opacity: 1 }];
+      }
+      anim = [box.animate(k, { duration: phone() ? 560 : 620, easing: phone() ? SHEET : 'cubic-bezier(.2,.95,.25,1)' }), scrim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' })];
+      anim[0].onfinish = () => { anim = null; };
+    }
     setTimeout(() => $('.pop__x', pop).focus({ preventScroll: true }), 30);
   };
-  const close = () => {
-    if (pop.hidden) return;
-    pop.classList.remove('is-on'); document.documentElement.classList.remove('pop-open'); if (window.lenis) lenis.start();
-    closeT = setTimeout(() => { pop.hidden = true; body.textContent = ''; box.style.transform = ''; }, 380);
+  const close = (fromY = 0) => {
+    if (pop.hidden || closing) return; closing = true; stop();
+    document.documentElement.classList.remove('pop-open'); if (window.lenis) lenis.start();
+    const end = () => { pop.hidden = true; pop.classList.remove('is-on'); body.textContent = ''; box.style.transform = ''; anim = null; closing = false; };
+    if (RM || !box.animate) end();
+    else {
+      const scrim = $('.pop__scrim', pop);
+      const k = phone() ? [{ transform: `translateY(${fromY}px)` }, { transform: 'translateY(105%)' }] : [{ transform: 'none', opacity: 1 }, { transform: 'translateY(14px) scale(.96)', opacity: 0 }];
+      anim = [box.animate(k, { duration: phone() ? 340 : 240, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' }), scrim.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: 'ease-in', fill: 'forwards' })];
+      anim[0].onfinish = end;
+    }
     if (from && from.focus) from.focus({ preventScroll: true });
   };
   window.wrPop = { open, close };
-  $$('[data-pop-close]', pop).forEach(b => b.addEventListener('click', close));
+  $$('[data-pop-close]', pop).forEach(b => b.addEventListener('click', () => close()));
   pop.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.preventDefault(); close(); }
     if (e.key === 'Tab') { const f = $$('button,a[href],input,summary,[tabindex]:not([tabindex="-1"])', box).filter(x => x.offsetParent); if (!f.length) return; const a = f[0], z = f[f.length - 1];
       if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); } else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); } }
   });
-  /* drag the sheet down to close it */
-  let dy0 = null;
+  /* drag the sheet down to close it: it follows the finger (with a little resistance upwards), a quick flick is enough */
+  let dg = null;
   $$('.pop__grab,.pop__head', pop).forEach(h => {
-    h.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; dy0 = e.clientY; box.style.transition = 'none'; h.setPointerCapture(e.pointerId); });
-    h.addEventListener('pointermove', e => { if (dy0 === null) return; box.style.transform = `translateY(${Math.max(0, e.clientY - dy0)}px)`; });
-    const end = e => { if (dy0 === null) return; const d = e.clientY - dy0; dy0 = null; box.style.transition = ''; if (d > 90) close(); else box.style.transform = ''; };
+    h.addEventListener('pointerdown', e => { if (e.target.closest('button') || !phone()) return; stop(); dg = { y: e.clientY, t: performance.now(), v: 0, d: 0 }; h.setPointerCapture(e.pointerId); });
+    h.addEventListener('pointermove', e => { if (!dg) return; const d = e.clientY - dg.y, t = performance.now(); dg.v = (d - dg.d) / Math.max(1, t - dg.t); dg.d = d; dg.t = t; box.style.transform = `translateY(${d > 0 ? d : d / 4}px)`; });
+    const end = () => { if (!dg) return; const { d, v } = dg; dg = null;
+      if (d > 110 || v > .55) close(Math.max(0, d));
+      else if (!RM && box.animate) { box.style.transform = ''; anim = [box.animate([{ transform: `translateY(${d > 0 ? d : d / 4}px)` }, { transform: 'none' }], { duration: 420, easing: SHEET })]; }
+      else box.style.transform = ''; };
     h.addEventListener('pointerup', end); h.addEventListener('pointercancel', end);
   });
   $$('[data-pop]').forEach(card => {
@@ -437,8 +460,8 @@ addEventListener('load', refit);
     const sp = document.createElement('span'); sp.textContent = card.dataset.popLabel || tx('Details', 'Detaljer'); b.appendChild(sp);
     b.insertAdjacentHTML('beforeend', '<svg aria-hidden="true"><use href="#i-plus"/></svg>');
     more.before(b);
-    b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); open(card); });
-    if (card.hasAttribute('data-pop-tap')) card.addEventListener('click', e => { if (e.target.closest('a,button,input,summary')) return; if (getComputedStyle(b).display === 'none') return; open(card); });
+    b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); open(card, b); });
+    if (card.hasAttribute('data-pop-tap')) card.addEventListener('click', e => { if (e.target.closest('a,button,input,summary')) return; if (getComputedStyle(b).display === 'none') return; open(card, b); });
   });
 })();
 
@@ -503,31 +526,61 @@ addEventListener('load', refit);
   const want = b => { queue.add(b); if (!raf) raf = requestAnimationFrame(flush); };
   const ro = window.ResizeObserver ? new ResizeObserver(es => es.forEach(e => want(e.target))) : null;
   const seen = new WeakSet();
-  const watch = root => { (root.matches && root.matches(SEL) ? [root] : []).concat($$(SEL, root)).forEach(b => { if (seen.has(b)) return; seen.add(b); if (ro) ro.observe(b); want(b); }); };
-  watch(document);
+  const watch = (root, now) => { const list = (root.matches && root.matches(SEL) ? [root] : []).concat($$(SEL, root)).filter(b => !seen.has(b)); list.forEach(b => { seen.add(b); if (ro) ro.observe(b); });
+    if (now) { const bad = list.filter(b => b.offsetWidth && over(b)); bad.forEach(fit); list.forEach(b => { if (!bad.includes(b) && b.offsetWidth) last.set(b, b.offsetWidth + '|' + b.textContent); }); } else list.forEach(want); };
+  watch(document, true);
   new MutationObserver(ms => ms.forEach(m => {
     const t = m.target.nodeType === 1 ? m.target : m.target.parentElement; if (!t) return;
     const b = t.closest(SEL); if (b) { last.delete(b); want(b); }
     m.addedNodes.forEach(n => { if (n.nodeType === 1) watch(n); });
   })).observe(document.body, { childList: true, subtree: true, characterData: true });
   const all = () => $$(SEL).forEach(b => { last.delete(b); want(b); });
-  if (document.fonts) { document.fonts.ready.then(all); document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', all); }
-  addEventListener('load', () => { all(); setTimeout(all, 900); setTimeout(all, 2600); });
+  if (document.fonts) document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', () => setTimeout(all, 30));
+  addEventListener('load', () => { setTimeout(all, 60); setTimeout(all, 900); setTimeout(all, 2600); });
   window.wrFit = all;
 })();
 
-/* ---------- mini car: a little car that keeps getting re-wrapped, one film colour after another ---------- */
-const PAL = ['#c2161f', '#0aa3b8', '#4b2a72', '#7bc043', '#e2378a', '#f2b705', '#d9dbde', '#141516', '#1340a8'];
-function runCar(svg, sw) {
-  if (!svg || svg._run) return; svg._run = true;
-  let i = 0;
-  const set = () => { svg.style.setProperty('--mc-a', PAL[i % PAL.length]); svg.style.setProperty('--mc-b', PAL[(i + 1) % PAL.length]); if (sw) $$('i', sw).forEach((x, j) => x.classList.toggle('is-on', j === (i + 1) % PAL.length)); };
-  set();
-  const b = $('.mc-b', svg); if (b) b.addEventListener('animationiteration', () => { i++; set(); });
-  if (RM) { svg.style.setProperty('--mc-b', PAL[0]); return; }
-  new IntersectionObserver(es => es.forEach(e => svg.classList.toggle('is-run', e.isIntersecting))).observe(svg);
+/* ---------- wrap wipe: a studio car (a real render) re-wrapped in one real film after another — 3D band, last job card, nudge.
+   The next film is laid over the current one behind a squeegee line, left to right, like it's done in the bay. ---------- */
+function wipeCar(root, every = 3800) {
+  if (!root || root._wipe) return; root._wipe = true;
+  const box = root.classList.contains('wcar') ? root : $('.wcar', root); if (!box) return;
+  const imgs = $$('img', box), n = imgs.length; if (n < 2) return;
+  const sq = $('.wcar__sq', box), sws = $$('.sband__sw button', root), film = $('.sband__film', root);
+  const code = $('[data-wipe-code]', root), name = $('[data-wipe-name]', root), fin = $('[data-wipe-fin]', root);
+  const links = $$('[data-wipe-go]', root), q = root.dataset.q || '', carKey = root.dataset.car, carName = root.dataset.carname || '';
+  let i = 0, busy = false, timer = 0, vis = false, hold = false;
+  /* only the first film loads with the page; the others are fetched once the car is (nearly) on screen */
+  const fetchAll = () => imgs.forEach(im => { if (!im.getAttribute('src') && im.dataset.src) im.src = im.dataset.src; });
+  const ready = im => { fetchAll(); return (im.complete && im.naturalWidth) ? Promise.resolve() : new Promise(r => { im.loading = 'eager'; im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }); };
+  const label = j => {
+    const d = imgs[j].dataset;
+    sws.forEach((b, k) => b.setAttribute('aria-pressed', k === j));
+    if (carKey) links.forEach(a => a.href = `${R('studio')}?car=${carKey}&film=${encodeURIComponent(d.film)}${q}`);
+    const set = () => { if (code) code.textContent = d.code; if (name) name.textContent = d.name; if (fin) fin.textContent = d.fin + (carName ? ' · ' + carName : ''); };
+    if (!film || RM) return set();
+    film.classList.add('is-swap'); setTimeout(() => { set(); film.classList.remove('is-swap'); }, 300);
+  };
+  const go = async j => {
+    j = (j + n) % n; if (busy || j === i) return; busy = true;
+    const a = imgs[i], b = imgs[j]; await ready(b);
+    label(j);
+    const done = () => { b.classList.add('is-on'); b.classList.remove('is-next'); a.classList.remove('is-on'); i = j; busy = false; };
+    if (RM || !b.animate) { done(); return; }
+    b.classList.add('is-next');
+    const o = { duration: 1250, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' };
+    const an = b.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], o);
+    if (sq) sq.animate([{ left: '0%', opacity: 0 }, { left: '4%', opacity: 1, offset: .06 }, { left: '96%', opacity: 1, offset: .94 }, { left: '100%', opacity: 0 }], o);
+    an.onfinish = () => { done(); an.cancel(); };
+  };
+  const tick = () => { clearTimeout(timer); if (RM || !vis) return; timer = setTimeout(() => { if (!hold && !document.hidden) go(i + 1); tick(); }, every); };
+  sws.forEach((b, k) => b.addEventListener('click', () => { go(k); tick(); }));
+  root.addEventListener('pointerenter', () => hold = true); root.addEventListener('pointerleave', () => hold = false);
+  root.addEventListener('focusin', () => hold = true); root.addEventListener('focusout', () => hold = false);
+  new IntersectionObserver(es => es.forEach(e => { vis = e.isIntersecting; if (vis) { fetchAll(); tick(); } else clearTimeout(timer); }), { rootMargin: '200px 0px' }).observe(root);
 }
-$$('.sband').forEach(b => runCar($('.minicar', b), $('.sband__sw', b)));
+$$('[data-wipe]').forEach(r => wipeCar(r, r.classList.contains('card') ? 3200 : 3800));
+
 
 /* ---------- nudge: after a couple of seconds of scrolling, a quiet invitation to build the car in 3D (once per visit) ---------- */
 (() => {
@@ -558,7 +611,7 @@ $$('.sband').forEach(b => runCar($('.minicar', b), $('.sband__sw', b)));
     document.body.appendChild(el);
     $$('.nudge__x,.nudge__no', el).forEach(b => b.addEventListener('click', close));
     el.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-    runCar($('.minicar', el));
+    wipeCar($('.nudge__vis .wcar', el), 2600);
     requestAnimationFrame(() => requestAnimationFrame(() => el && el.classList.add('is-on')));
     const arm = () => { clearTimeout(hideT); hideT = setTimeout(close, 16000); };
     arm(); el.addEventListener('pointerenter', () => clearTimeout(hideT)); el.addEventListener('pointerleave', arm);
@@ -630,7 +683,9 @@ $$('[data-deck]').forEach(root => {
 
 /* ════════ motion (GSAP + Lenis). Without them the page still works, just still. ════════ */
 const pre = () => document.documentElement.classList.remove('wr-pre');
-(() => {
+const fontsIn = new Promise(r => { if (!document.fonts || document.fonts.status === 'loaded') return r(); document.fonts.ready.then(r); setTimeout(r, 700); });
+fontsIn.then(() => { fitHeads(); motion(); if (document.fonts) { if (document.fonts.status !== 'loaded') document.fonts.ready.then(refit); document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', refit); } });
+function motion() {
   const isHome = !!$('.hero');
   const heroGo = () => { const h = $('.hero'); if (h) h.classList.add('is-lit'); window.wrHeroReady = true; if (window.wrHeroStart) window.wrHeroStart(); };
   /* desktop: the studio light and the big WRAPPI follow the pointer a little */
@@ -660,6 +715,41 @@ const pre = () => document.documentElement.classList.remove('wr-pre');
     gsap.fromTo('.hero__stage', { autoAlpha: 0, x: -50 }, { autoAlpha: 1, x: 0, duration: 1.6, ease: 'expo.out', delay: .15, clearProps: 'transform' });
   }
   const ph = $('.phead'); if (ph) gsap.fromTo($$('.phead__crumbs,.phead .tag,.phead h1 .h-line > span,.phead__lead,.phead .acts,.phead__media figure', ph), { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .9, stagger: .05, ease: 'expo.out', delay: .1 });
+
+  /* featured jobs: the section holds still and the row of cards slides sideways as you scroll down.
+     A sideways swipe on the cards still works: it simply scrolls the page by the same amount. */
+  $$('.tour').forEach(sec => {
+    const track = $('.tour__track', sec); if (!track || track.children.length < 3) return;
+    sec.classList.add('is-scrub');
+    const vw = () => document.documentElement.clientWidth;
+    const dist = () => Math.max(0, track.scrollWidth - vw());
+    const bar = $('.tour__bar i', sec); let ends = null;
+    const st = ScrollTrigger.create({
+      trigger: sec, start: () => sec.offsetHeight > innerHeight - 40 ? 'bottom bottom' : 'center center', end: () => '+=' + dist(),
+      pin: true, anticipatePin: 1, invalidateOnRefresh: true, refreshPriority: 1,
+      animation: gsap.fromTo(track, { x: 0 }, { x: () => -dist(), ease: 'none' }), scrub: .6,
+      onUpdate: s => { if (bar) bar.style.setProperty('--tp', s.progress.toFixed(3)); if (ends) ends(); }
+    });
+    const to = y => window.lenis ? lenis.scrollTo(y, { duration: .9 }) : scrollTo({ top: y, behavior: 'smooth' });
+    /* arrows: one card at a time */
+    const nav = $('.tour__nav', sec);
+    if (nav) { const [p, n] = $$('button', nav).map(b => { const c = b.cloneNode(true); b.replaceWith(c); return c; });
+      const step = d => { const c = $('.card', track), w = (c ? c.offsetWidth : 320) + 16; to(Math.min(st.end, Math.max(st.start, st.scroll() + d * w))); };
+      p.addEventListener('click', () => step(-1)); n.addEventListener('click', () => step(1));
+      ends = () => { p.disabled = st.progress < .005; n.disabled = st.progress > .995; }; ends(); }
+    /* sideways drag / swipe → page scroll */
+    let dx0 = null, dy0 = 0, on = false;
+    track.addEventListener('pointerdown', e => { if (e.button > 0) return; dx0 = e.clientX; dy0 = e.clientY; on = false; }, { passive: true });
+    track.addEventListener('pointermove', e => {
+      if (dx0 === null) return; const dx = e.clientX - dx0, dy = e.clientY - dy0;
+      if (!on) { if (Math.abs(dx) < 8) return; if (Math.abs(dy) > Math.abs(dx)) { dx0 = null; return; } on = true; track.classList.add('is-dragging'); }
+      dx0 = e.clientX; const y = st.scroll() - dx;
+      if (window.lenis) lenis.scrollTo(y, { immediate: true }); else scrollTo(0, y);
+    }, { passive: true });
+    const up = () => { dx0 = null; if (on) setTimeout(() => track.classList.remove('is-dragging'), 50); on = false; };
+    track.addEventListener('pointerup', up); track.addEventListener('pointercancel', up);
+    track.addEventListener('click', e => { if (track.classList.contains('is-dragging')) { e.preventDefault(); e.stopPropagation(); } }, true);
+  });
 
   /* nav hide/show + reading progress */
   const nav = $('#nav'); let lastY = 0;
@@ -691,5 +781,5 @@ const pre = () => document.documentElement.classList.remove('wr-pre');
   const fb = $('.foot__big'); if (fb) { fb.innerHTML = [...fb.textContent].map(c => `<span>${c}</span>`).join(''); gsap.from($$('span', fb), { yPercent: 100, autoAlpha: 0, duration: 1.1, stagger: .06, ease: 'expo.out', scrollTrigger: { trigger: fb, start: 'top 95%', once: true } }); }
   pre();
   ScrollTrigger.refresh();
-})();
+}
 })();
