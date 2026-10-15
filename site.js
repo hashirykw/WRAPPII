@@ -43,25 +43,51 @@ const wa = t => `https://wa.me/${WRAPPI.wa}?text=${encodeURIComponent(t)}`;
 const R = k => WR.routes[k] || './';
 const own = (o, k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k);
 
-/* language preference: remember the last choice so the home page opens in it next time */
-$$('[data-setlang]').forEach(a => a.addEventListener('click', () => { try { localStorage.setItem('wrappi-lang', a.dataset.setlang); } catch (e) {} }));
-
-/* visitors whose browser isn't Norwegian get a quiet link to the English page (no redirect — both versions stay indexable) */
-(() => {
-  let pref = null; try { pref = localStorage.getItem('wrappi-lang'); } catch (e) {}
-  const nb = /^(nb|nn|no)\b/i.test(navigator.language || '');
-  const want = pref || (nb ? 'no' : 'en');
-  if (want === LANG || !WR.other) return;
-  try { if (sessionStorage.getItem('wrappi-langnote')) return; } catch (e) {}
-  const el = document.createElement('div'); el.className = 'langnote'; el.setAttribute('role', 'note');
-  el.innerHTML = want === 'en' ? `<span>This page is in Norwegian.</span><a href="${WR.other}" data-setlang="en">English</a><button type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button>` : `<span>Denne siden er på engelsk.</span><a href="${WR.other}" data-setlang="no">Norsk</a><button type="button" aria-label="Lukk"><svg><use href="#i-x"/></svg></button>`;
-  document.body.appendChild(el);
-  const close = () => { el.classList.remove('is-on'); document.body.classList.remove('note-on'); try { sessionStorage.setItem('wrappi-langnote', '1'); } catch (e) {} };
-  el.querySelector('button').addEventListener('click', close);
-  el.querySelector('a').addEventListener('click', () => { try { localStorage.setItem('wrappi-lang', el.querySelector('a').dataset.setlang); } catch (e) {} });
-  setTimeout(() => { el.classList.add('is-on'); document.body.classList.add('note-on'); }, 2600);
-  setTimeout(close, 16000);
+/* ---------- language: Norwegian unless the visitor picks English (header NO/EN or the cookie bar).
+   The pick is kept on this device, and boot.js opens every page in it from then on.
+   Switching swaps to the same page in the other language, at the same spot, carrying anything the visitor
+   was building (3D studio, price builder) — and if the cookie bar was up, it pops straight back up there. ---------- */
+const SWITCH = 'wrappi-switch';
+const CARRY = (() => {
+  let n = null; try { n = JSON.parse(sessionStorage.getItem(SWITCH) || 'null'); sessionStorage.removeItem(SWITCH); } catch (e) {}
+  return n && typeof n === 'object' && n.to === LANG && Date.now() - (+n.t || 0) < 60000 ? n : null;
 })();
+const spotParts = () => $$('main > *, body > footer');
+const spotNow = () => {
+  if (scrollY < 40) return null;
+  const parts = spotParts(); let k = -1;
+  parts.forEach((el, i) => { if (el.getBoundingClientRect().top <= 90) k = i; });
+  if (k < 0) return null;
+  const r = parts[k].getBoundingClientRect();
+  return { k, n: parts.length, f: r.height ? Math.min(1, Math.max(0, (90 - r.top) / r.height)) : 0 };
+};
+let spotMoved = false;
+const landSpot = () => {
+  const s = CARRY && CARRY.spot; if (!s || spotMoved) return;
+  const parts = spotParts(); if (parts.length !== s.n || !parts[s.k]) return;
+  const r = parts[s.k].getBoundingClientRect(), y = Math.max(0, Math.round(scrollY + r.top - 90 + s.f * r.height));
+  if (window.lenis) lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
+};
+if (CARRY && CARRY.spot) {
+  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(t => addEventListener(t, () => { spotMoved = true; }, { once: true, passive: true }));
+  addEventListener('load', () => setTimeout(landSpot, 120), { once: true });
+}
+$$('[data-setlang]').forEach(a => a.addEventListener('click', e => {
+  const to = a.dataset.setlang; if (to !== 'no' && to !== 'en') return;
+  try { localStorage.setItem('wrappi-lang', to); } catch (er) {}
+  if (to === LANG) { e.preventDefault(); return; }
+  if (e.button > 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;   /* a new tab: just follow the link */
+  e.preventDefault();
+  const bar = $('#consent'), u = new URL(a.href, location.href);
+  if (location.search) u.search = location.search;                                   /* ?car=…&film=…, ?svc=… */
+  if (window.wrBuild) { try { const h = String(wrBuild()), i = h.indexOf('#build='); if (i >= 0) u.hash = h.slice(i); } catch (er) {} }   /* the 3D studio build as it is right now */
+  else if (WR.page === 'work' && /^#[a-z]+$/.test(location.hash)) u.hash = location.hash;   /* the work filter */
+  const note = { to, t: Date.now(), kb: e.detail === 0, spot: u.hash ? null : spotNow(),
+    bar: !!(bar && !bar.hidden && bar.classList.contains('is-on')),
+    quote: window.wrQuoteNow ? wrQuoteNow() : null };
+  try { sessionStorage.setItem(SWITCH, JSON.stringify(note)); } catch (er) {}
+  location.href = u.href;
+}));
 
 /* WhatsApp links carry a ready message */
 $$('[data-wa]').forEach(a => a.href = wa(a.dataset.wa));
@@ -143,7 +169,7 @@ if (mqEl) {
 
 /* ---------- lightbox (any [data-lb] photo, the gallery and the featured jobs) ---------- */
 const lb = $('#lb'); let lbList = [], lbI = 0, lbFrom = null, lbCaps = {};
-function lbShow() { const f = lbList[lbI]; $('#lbMedia').innerHTML = `<img src="${f}" alt="${lbCaps[f] || ''}">`; $('#lbCap').textContent = lbCaps[f] || 'Wrappi'; $('#lbNum').textContent = (lbI + 1) + ' / ' + lbList.length; $$('.lb__prev,.lb__next').forEach(b => b.hidden = lbList.length < 2); }
+function lbShow() { const f = lbList[lbI]; if (!f) return; const im = new Image(); im.src = f; im.alt = lbCaps[f] || ''; $('#lbMedia').replaceChildren(im); $('#lbCap').textContent = lbCaps[f] || 'Wrappi'; $('#lbNum').textContent = (lbI + 1) + ' / ' + lbList.length; $$('.lb__prev,.lb__next').forEach(b => b.hidden = lbList.length < 2); }
 function lbOpen(file, list) { if (!lb) return; lbFrom = document.activeElement; lbList = list || [file]; lbI = Math.max(0, lbList.indexOf(file)); lbShow(); lb.hidden = false; $('.lb__close').focus(); if (window.lenis) lenis.stop(); }
 function lbClose() { lb.hidden = true; if (window.lenis) lenis.start(); if (lbFrom) lbFrom.focus(); }
 if (lb) {
@@ -279,14 +305,16 @@ if (qBox) {
   const Q = { size: 'mid', svc: new Set(), when: 0 };
   const pre = new URLSearchParams(location.search).get('svc'); if (own(WRAPPI.services, pre)) Q.svc.add(pre);
   /* with a yes in the cookie bar, the builder opens the way the visitor left it (each field checked before use) */
-  const saved = STORE.load('quote');
+  const saved = (CARRY && CARRY.quote && typeof CARRY.quote === 'object') ? CARRY.quote : STORE.load('quote');
   if (saved) {
+    if (CARRY && saved === CARRY.quote) Q.svc.clear();   /* carried over a language switch: exactly what was picked */
     if (own(WRAPPI.sizes, saved.size)) Q.size = saved.size;
-    if (!pre && Array.isArray(saved.svc)) saved.svc.filter(k => own(WRAPPI.services, k)).slice(0, 6).forEach(k => Q.svc.add(k));
+    if ((!pre || saved === (CARRY && CARRY.quote)) && Array.isArray(saved.svc)) saved.svc.filter(k => own(WRAPPI.services, k)).slice(0, 6).forEach(k => Q.svc.add(k));
     if (Number.isInteger(saved.when) && saved.when >= 0 && saved.when < 3) Q.when = saved.when;
     if (typeof saved.car === 'string') $('#qCar').value = saved.car.slice(0, 50);
     if (typeof saved.name === 'string') $('#qName').value = saved.name.slice(0, 40);
   }
+  window.wrQuoteNow = () => ({ size: Q.size, svc: [...Q.svc], when: Q.when, car: $('#qCar').value.trim().slice(0, 50), name: $('#qName').value.trim().slice(0, 40) });
   let saveT; const saveQuote = () => { clearTimeout(saveT); saveT = setTimeout(() => STORE.save('quote', { size: Q.size, svc: [...Q.svc], when: Q.when, car: $('#qCar').value.trim().slice(0, 50), name: $('#qName').value.trim().slice(0, 40) }), 400); };
   addEventListener('wr-consent', e => { if (e.detail) saveQuote(); });
   const WHEN = [['As soon as possible', 'Så snart som mulig'], ['November or December', 'November eller desember'], ['Just checking prices', 'Sjekker bare priser']];
@@ -299,9 +327,9 @@ if (qBox) {
     renderQuote();
   };
   const renderQuote = () => {
-    $$('[data-sz]').forEach(b => b.setAttribute('aria-checked', b.dataset.sz === Q.size));
-    $$('[data-v]').forEach(b => b.setAttribute('aria-pressed', Q.svc.has(b.dataset.v)));
-    $$('[data-n]').forEach(b => b.setAttribute('aria-checked', +b.dataset.n === Q.when));
+    $$('#sizePicks [data-sz]').forEach(b => b.setAttribute('aria-checked', b.dataset.sz === Q.size));
+    $$('#svcPicks [data-v]').forEach(b => b.setAttribute('aria-pressed', Q.svc.has(b.dataset.v)));
+    $$('#whenPicks [data-n]').forEach(b => b.setAttribute('aria-checked', +b.dataset.n === Q.when));
     const list = [...Q.svc].map(k => WRAPPI.services[k]), priced = list.filter(s => s.p !== null), req = list.length - priced.length;
     const from = priced.some(s => s.from || (s.p === 'size:ppf' && Q.size === 'xl')), sum = priced.reduce((a, s) => a + priceOf(s), 0);
     $('#estV').textContent = !list.length ? tx('Pick a service', 'Velg en tjeneste') : priced.length ? `${from ? tx('from ', 'fra ') : ''}${nok(sum)}${req ? ' +' : ''}` : tx('On request', 'På forespørsel');
@@ -332,7 +360,7 @@ const footLegal = $('.foot__legal'); if (footLegal) new IntersectionObserver(es 
     { k: ['color', 'colour', 'farge', 'farget', 'kampanje', 'campaign'], a: tx(`Color PPF autumn campaign: car from ${nok(33000)}, SUV from ${nok(38000)}, van from ${nok(45000)}, with a 10-year warranty. Booking now for November & December. <a href="${R('ppf')}#color-ppf">Read more</a>.`, `Høstkampanje farget PPF: personbil fra ${nok(33000)}, SUV fra ${nok(38000)}, varebil fra ${nok(45000)}, med 10 års garanti. Vi tar imot booking for november og desember. <a href="${R('ppf')}#color-ppf">Les mer</a>.`) },
     { k: ['3m', 'avery', 'hexis', '2080', 'swf'], a: tx(`We wrap with 3M 2080, Avery Dennison Supreme Wrapping Film and Hexis. <a href="${R('studio')}">Try the colours on a car</a>.`, `Vi folierer med 3M 2080, Avery Dennison Supreme Wrapping Film og Hexis. <a href="${R('studio')}">Prøv fargene på en bil</a>.`) },
     { k: ['front'], a: tx(`Front PPF from ${nok(12900)}: whole bonnet, front bumper, both front wings, both A-pillars, both side mirrors and the headlights.`, `Front PPF fra ${nok(12900)}: hele panseret, frontfanger, begge forskjermene, begge A-stolpene, begge sidespeilene og frontlyktene.`) },
-    { k: ['film', 'brand', 'titanium', 'folie', 'merke', 'which'], a: tx(`Our PPF is PPF Art Design Titanium: 216 µm total, 165 µm TPU, self-healing top coat, −45 to +115 °C. <a href="${R('ppf')}#film">See the specs</a>.`, `PPF-en vår er PPF Art Design Titanium: 216 µm totalt, 165 µm TPU, selvhelende toppcoat, −45 til +115 °C. <a href="${R('ppf')}#film">Se tallene</a>.`) },
+    { k: ['film', 'brand', 'titanium', 'folie', 'merke'], a: tx(`Our PPF is PPF Art Design Titanium: 216 µm total, 165 µm TPU, self-healing top coat, −45 to +115 °C. <a href="${R('ppf')}#film">See the specs</a>.`, `PPF-en vår er PPF Art Design Titanium: 216 µm totalt, 165 µm TPU, selvhelende toppcoat, −45 til +115 °C. <a href="${R('ppf')}#film">Se tallene</a>.`) },
     { k: ['day', 'long', 'time', 'dager', 'lenge', 'tid'], a: tx('PPF takes 3–4 days: 20–24 working hours of fitting, then about 24 hours for the film to settle before we check every edge.', 'PPF tar 3–4 dager: 20–24 arbeidstimer montering, så ca. 24 timer for at filmen skal stabilisere seg før vi sjekker alle kanter.') },
     { k: ['wash', 'vask'], a: tx("Don't wash it for the first 48–72 hours after pick-up.", 'Ikke vask bilen de første 48–72 timene etter henting.') },
     { k: ['warranty', 'garanti', 'guarantee'], a: tx("Up to 10 years' manufacturer warranty on film and fitting.", 'Opptil 10 års produsentgaranti på film og montering.') },
@@ -347,7 +375,12 @@ const footLegal = $('.foot__legal'); if (footLegal) new IntersectionObserver(es 
     { k: ['tesla', 'electric', 'ev', 'elbil'], a: tx('Yes — most cars on our price list are electric, Teslas included.', 'Ja — de fleste bilene på prislisten vår er elbiler, Tesla også.') }
   ];
   const say = (h, me) => { const d = document.createElement('div'); d.className = 'msg ' + (me ? 'msg--me' : 'msg--bot'); d[me ? 'textContent' : 'innerHTML'] = h; log.appendChild(d); log.scrollTop = log.scrollHeight; };
-  const answer = q => { const s = q.toLowerCase(), hit = A().find(r => r.k.some(k => s.includes(k))); setTimeout(() => say(hit ? hit.a : tx(`Good one for the team. <a href="${wa('Hi Wrappi! ' + q)}" target="_blank" rel="noopener">Send it on WhatsApp</a>.`, `Den tar teamet. <a href="${wa('Hei Wrappi! ' + q)}" target="_blank" rel="noopener">Send den på WhatsApp</a>.`)), 350); };
+  /* a keyword counts only at the start of a word ("price" in "prices", not "who" in "whole" or "ring" in "during");
+     short ones (≤ 3 letters: ev, 3m, who, tid…) must be the whole word, plural allowed */
+  const W = 'a-z0-9æøåäöü', esc = k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const has = (s, k) => new RegExp(`(^|[^${W}])${esc(k)}${k.length <= 3 ? `s?($|[^${W}])` : ''}`, 'i').test(s);
+  /* the name itself isn't a topic ("Wrappi" would read as "wrap") */
+  const answer = q => { const s = q.toLowerCase().replace(/wrappi\w*/g, ' '), hit = A().find(r => r.k.some(k => has(s, k))); setTimeout(() => say(hit ? hit.a : tx(`Good one for the team. <a href="${wa('Hi Wrappi! ' + q)}" target="_blank" rel="noopener">Send it on WhatsApp</a>.`, `Den tar teamet. <a href="${wa('Hei Wrappi! ' + q)}" target="_blank" rel="noopener">Send den på WhatsApp</a>.`)), 350); };
   $('#botChips').innerHTML = (LANG === 'no' ? ['Priser', 'Farget PPF', 'Front PPF', 'Filmene', 'Garanti', 'Hvor er dere?'] : ['Prices', 'Color PPF', 'Front PPF', 'The films', 'Warranty', 'Where are you?']).map(c => `<button type="button">${c}</button>`).join('');
   $('#botChips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; say(b.textContent, true); answer(b.textContent); });
   $('#botForm').addEventListener('submit', e => { e.preventDefault(); const v = $('#botIn').value.trim(); if (!v) return; say(v, true); $('#botIn').value = ''; answer(v); });
@@ -476,7 +509,11 @@ let refitT = 0; const refit = () => { clearTimeout(refitT); refitT = setTimeout(
   const hide = () => { bar.classList.remove('is-on'); document.body.classList.remove('consent-on'); setTimeout(() => { bar.hidden = true; }, 500); };
   $$('[data-consent]', bar).forEach(b => b.addEventListener('click', () => { STORE.setConsent(b.dataset.consent === 'yes'); hide(); if (window.wrToast) wrToast(b.dataset.consent === 'yes' ? tx('Done — your next build will be waiting for you.', 'Greit — neste bygg venter på deg.') : tx('Okay — nothing is saved.', 'Greit — ingenting lagres.')); }));
   $$('[data-consent-open]').forEach(b => b.addEventListener('click', show));
-  if (!STORE.answered()) setTimeout(show, 1800);
+  /* the language picker in the bar: the bar stays up through the switch (handled with the other language links above) */
+  if (CARRY && CARRY.bar) {
+    show();
+    if (CARRY.kb) setTimeout(() => { const cur = $('.consent__lang [aria-current="true"]', bar); if (cur) cur.focus({ preventScroll: true }); }, 60);
+  } else if (!STORE.answered()) setTimeout(show, 1800);
 })();
 
 /* ---------- home: the 3D engine loads once the page is up, so the first view is instant ---------- */
@@ -688,7 +725,7 @@ $$('[data-deck]').forEach(root => {
 /* ════════ motion (GSAP + Lenis). Without them the page still works, just still. ════════ */
 const pre = () => document.documentElement.classList.remove('wr-pre');
 const fontsIn = new Promise(r => { if (!document.fonts || document.fonts.status === 'loaded') return r(); document.fonts.ready.then(r); setTimeout(r, 700); });
-fontsIn.then(() => { fitHeads(); motion(); if (document.fonts) { if (document.fonts.status !== 'loaded') document.fonts.ready.then(refit); document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', refit); } });
+fontsIn.then(() => { fitHeads(); motion(); requestAnimationFrame(landSpot); if (document.fonts) { if (document.fonts.status !== 'loaded') document.fonts.ready.then(refit); document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', refit); } });
 function motion() {
   const isHome = !!$('.hero');
   const heroGo = () => { const h = $('.hero'); if (h) h.classList.add('is-lit'); window.wrHeroReady = true; if (window.wrHeroStart) window.wrHeroStart(); };

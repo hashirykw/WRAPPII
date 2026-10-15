@@ -14,6 +14,27 @@
   var cfg = document.getElementById('wr-data');
   try { window.WR = JSON.parse(cfg ? cfg.textContent : '{}'); } catch (e) { window.WR = { lang: 'no', routes: {} }; }
 
+  /* language: Norwegian by default. Once the visitor has picked a language (header NO/EN or the cookie bar),
+     any page opened fresh — a bookmark, a shared link, a search result, the bare address — opens in that language.
+     Back/forward and reloads are left alone, and search engines (no saved pick) always get the page as it is. */
+  (function () {
+    var W = window.WR || {}, pref = null;
+    try { pref = localStorage.getItem('wrappi-lang'); } catch (e) {}
+    if ((pref !== 'no' && pref !== 'en') || !W.lang || pref === W.lang || !W.other) return;
+    var nt = '';
+    try { var en = performance.getEntriesByType && performance.getEntriesByType('navigation')[0]; nt = en ? en.type : ''; } catch (e) {}
+    if (!nt && performance.navigation) nt = ['navigate', 'reload', 'back_forward'][performance.navigation.type] || '';
+    if (nt === 'reload' || nt === 'back_forward') return;
+    try { var last = +sessionStorage.getItem('wrappi-hop') || 0; if (Date.now() - last < 4000) return; sessionStorage.setItem('wrappi-hop', String(Date.now())); } catch (e) {}
+    var to = W.other, loc = location;
+    if (loc.protocol === 'file:' || /\.html$/.test(loc.pathname)) to = (to === './' || to === '.' || to === '/') ? 'index.html' : to + '.html';
+    var u; try { u = new URL(to, loc.href); } catch (e) { return; }
+    u.search = loc.search; u.hash = loc.hash;
+    html.classList.add('wr-go');
+    setTimeout(function () { html.classList.remove('wr-go'); }, 1500);
+    loc.replace(u.href);
+  })();
+
   try {
     var cv = document.createElement('canvas'), nc = navigator.connection;
     if ((cv.getContext('webgl2') || cv.getContext('webgl')) && !(nc && (nc.saveData || /2g/.test(nc.effectiveType || '')))) html.classList.add('can3d');
