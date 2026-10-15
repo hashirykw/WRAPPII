@@ -7,21 +7,20 @@ window.WRAPPI = {
   phones: ['+47 462 28 133', '+47 463 61 675'],
   address: 'Strømsveien 324, 1081 Oslo',
   instagram: 'https://www.instagram.com/wrappi__/',
-  sizes: { // full-car PPF tiers + Color PPF autumn campaign tiers
-    small: { en: 'Small car', no: 'Liten bil', hint: 'ID.3, MG4, Leaf', ppf: 30000, color: 33000, from: true },
-    mid:   { en: 'Mid-size', no: 'Mellomstor', hint: 'Model 3, i4, Polestar 2', ppf: 33000, color: 33000, from: true },
-    suv:   { en: 'Large / SUV', no: 'Stor / SUV', hint: 'ID.4, Enyaq, Q4 e-tron', ppf: 36000, color: 38000, from: true },
-    xl:    { en: 'XL / van', no: 'XL / varebil', hint: 'ID. Buzz, Transporter', ppf: 45000, color: 45000, from: true }
+  sizes: { // starting prices by car size (NOK) — null = price on request
+    sedan: { en: 'Sedan / car', no: 'Sedan / personbil', hint: 'Model 3, i4, ID.3', ppf: 39000, color: 45000, wrap: 27000 },
+    suv:   { en: 'SUV', no: 'SUV', hint: 'Model Y, ID.4, Q4 e-tron', ppf: 45000, color: 53000, wrap: 33000 },
+    van:   { en: 'Van', no: 'Varebil', hint: 'ID. Buzz, Transporter', ppf: 50000, color: 58000, wrap: null }
   },
   services: { // g = only one per group · p = price (number, 'size:ppf', 'size:color') · null = on request
     ppfFull:  { g: 'ppf', en: 'PPF · full car', no: 'PPF · hel bil', p: 'size:ppf', from: true },
     colorPpf: { g: 'ppf', en: 'Color PPF', no: 'Farget PPF', p: 'size:color', from: true },
-    ppfFront: { g: 'ppf', en: 'Front PPF', no: 'Front PPF', p: 12900, from: true },
+    ppfFront: { g: 'ppf', en: 'Front PPF (16 000–22 000)', no: 'Front PPF (16 000–22 000)', p: 16000, from: true },
     shine:    { g: 'shine', en: 'Full Shine', no: 'Full Shine', p: 5999, from: true },
     shineCer: { g: 'shine', en: 'Full Shine + ceramic', no: 'Full Shine + keramisk', p: 6999, from: true },
     polish1:  { g: 'shine', en: '1-step polish', no: 'Polering 1-steg', p: 2990, from: true },
     polish2:  { g: 'shine', en: '2-step polish', no: 'Polering 2-steg', p: 4990, from: true },
-    wrap:     { en: 'Car wrap · vinyl or PET', no: 'Bilwrapping · vinyl eller PET', p: null },
+    wrap:     { en: 'Car wrap · vinyl or PET', no: 'Bilwrapping · vinyl eller PET', p: 'size:wrap', from: true },
     details:  { en: 'Chrome delete / stripes / details', no: 'Chrome delete / striper / detaljer', p: null },
     fleet:    { en: 'Fleet graphics', no: 'Firmabil / profilering', p: null },
     tint:     { en: 'Window tint', no: 'Vindusfilm', p: null },
@@ -346,7 +345,7 @@ if (baBox) {
 }
 
 /* ---------- gallery ---------- */
-const grid = $('#workGrid');
+const grid = $('#fan');
 if (grid) {
   const CAT = { all: ['All', 'Alle'], ppf: ['PPF', 'PPF'], colour: ['Colour & Color PPF', 'Farge og farget PPF'], wrap: ['Wrap & graphics', 'Folie og grafikk'], polish: ['Polish & ceramic', 'Polering og coating'], fleet: ['Fleet', 'Firmabiler'], bay: ['In the bay', 'I verkstedet'] };
   const WORK = [
@@ -383,22 +382,54 @@ if (grid) {
     ['ix-grille.webp', 'bay', 'BMW iX · grille', 'BMW iX · grill', ''],
     ['lime-mirror-close.webp', 'colour', 'Lime, up close', 'Lime, helt nært', '']
   ];
-  const W_LIMIT = 8; let wCat = (location.hash.match(/^#(ppf|colour|wrap|polish|fleet|bay)$/) || [])[1] || 'all', wAll = false;
-  grid.innerHTML = WORK.map((w, i) => `<figure class="shot ${w[4]}" data-cat="${w[1]}" data-i="${i}" data-cursor="view"><img src="${w[0]}" alt="${tx(w[2], w[3])}" loading="lazy"><figcaption><b>${tx(w[2], w[3])}</b><span>${tx(...CAT[w[1]])}</span></figcaption><button aria-label="${tx('Open photo', 'Åpne bilde')}: ${tx(w[2], w[3])}"></button></figure>`).join('');
+  /* the Verzish gallery: one set at a time, laid out as a fanned deck of frames (a swipe deck on touch screens) */
+  const fan = grid, fanTabs = $('#fanTabs'), fanN = $('#fanN');
+  const SETS = ['colour', 'wrap', 'ppf', 'polish', 'fleet', 'bay'].map(k => ({ k, label: tx(...CAT[k]), items: WORK.filter(w => w[1] === k) })).filter(st => st.items.length);
   WORK.forEach(w => lbCaps[w[0]] = tx(w[2], w[3]));
-  $('#workFilters').innerHTML = Object.entries(CAT).map(([k, v]) => `<button class="pick" data-w="${k}" aria-pressed="${k === wCat}">${tx(...v)}</button>`).join('');
-  const filterWork = cat => {
-    wCat = cat; $$('[data-w]').forEach(b => b.setAttribute('aria-pressed', b.dataset.w === cat));
-    let n = 0, shown = 0, cells = 0, cut = false;
-    $$('.shot', grid).forEach(s => { const on = cat === 'all' || s.dataset.cat === cat; s.classList.toggle('is-out', !on); if (on && !cut && !wAll && shown >= W_LIMIT && cells % 2 === 0) cut = true; s.classList.toggle('is-more', on && cut); if (on) { n++; if (!cut) { shown++; cells += s.classList.contains('w2') ? 2 : 1; } } });
-    $('#workN').textContent = n; $('#workMore').hidden = wAll || !cut; $('#workMoreN').textContent = '· ' + n;
-    if (window.gsap && !RM) gsap.fromTo($$('.shot:not(.is-out)', grid), { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: .6, stagger: .025, ease: 'expo.out' });
-    if (window.ScrollTrigger) ScrollTrigger.refresh();
-  };
-  $('#workFilters').addEventListener('click', e => { const b = e.target.closest('[data-w]'); if (b) { wAll = false; filterWork(b.dataset.w); } });
-  $('#workMore').addEventListener('click', () => { const first = $('.shot.is-more', grid); wAll = true; filterWork(wCat); if (first) { const btn = $('button', first); if (btn) btn.focus({ preventScroll: true }); } });
-  grid.addEventListener('click', e => { const s = e.target.closest('.shot'); if (s) lbOpen(WORK[+s.dataset.i][0], $$('.shot:not(.is-out)', grid).map(x => WORK[+x.dataset.i][0])); });
-  filterWork(wCat);
+  const ROT = [-6, 4, -2.5, 5, -4, 3, -5, 2.5], LIFT = [14, -8, 10, -12, 6, -6, 12, -10];
+  const touchDeck = () => matchMedia('(hover: none), (max-width: 760px)').matches;
+  let cur = Math.max(0, SETS.findIndex(st => st.k === (location.hash.match(/^#(ppf|colour|wrap|polish|fleet|bay)$/) || [])[1])), dealt = false, fanIO = null;
+  SETS.forEach((st, i) => {
+    const b = document.createElement('button'); b.className = 'pick'; b.type = 'button'; b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', i === cur); b.setAttribute('aria-pressed', i === cur);
+    b.innerHTML = st.label + ' <span class="n">' + st.items.length + '</span>';
+    b.addEventListener('click', () => showSet(i, true)); fanTabs.appendChild(b);
+  });
+  function renderSet(i) {
+    const items = SETS[i].items, n = items.length;
+    fan.innerHTML = '';
+    items.forEach((w, k) => {
+      const x = n === 1 ? 50 : 13 + k * (74 / (n - 1)), cap = tx(w[2], w[3]);
+      const c = document.createElement('button'); c.className = 'fcard'; c.type = 'button';
+      c.style.cssText = `--x:${x}%;--r:${ROT[k % ROT.length]}deg;--y:${LIFT[k % LIFT.length]}px;--z:${10 + k}`;
+      c.setAttribute('aria-label', tx('Open photo', 'Åpne bilde') + ': ' + cap);
+      c.innerHTML = `<span class="fcard__in"><img src="${w[0]}" alt="${cap}" loading="lazy" decoding="async"><span class="fcard__tag">${cap}</span></span>`;
+      c.addEventListener('click', () => lbOpen(w[0], items.map(x => x[0]))); fan.appendChild(c);
+    });
+    fanN.textContent = n;
+    if (fanIO) fanIO.disconnect();
+    if (touchDeck()) { fanIO = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('is-live', e.intersectionRatio > .6)), { root: fan, threshold: [.6] }); $$('.fcard', fan).forEach(c => fanIO.observe(c)); fan.scrollLeft = 0; }
+  }
+  function deal() {
+    const inners = $$('.fcard__in', fan); if (!window.gsap || RM) return;
+    const w = fan.clientWidth, deck = !touchDeck();
+    gsap.fromTo(inners, { y: 160, x: (k, el) => deck ? (50 - parseFloat(el.parentNode.style.getPropertyValue('--x'))) / 100 * w : 0, rotation: k => -ROT[k % ROT.length] * 2, opacity: 0 },
+      { y: 0, x: 0, rotation: 0, opacity: 1, duration: 1.1, ease: 'expo.out', stagger: .07, overwrite: true });
+  }
+  function showSet(i, animate) {
+    if (i === cur && dealt) return;
+    $$('.pick', fanTabs).forEach((b, k) => { b.setAttribute('aria-selected', k === i); b.setAttribute('aria-pressed', k === i); });
+    const go = () => { cur = i; renderSet(i); if (animate) deal(); };
+    const inners = $$('.fcard__in', fan);
+    if (animate && window.gsap && !RM && inners.length) gsap.to(inners, { y: 90, opacity: 0, rotation: 0, duration: .32, ease: 'power2.in', stagger: .025, onComplete: go });
+    else go();
+  }
+  renderSet(cur);
+  fan.addEventListener('pointerover', e => { if (!touchDeck()) fan.classList.toggle('is-hovering', !!e.target.closest('.fcard')); });
+  fan.addEventListener('pointerleave', () => fan.classList.remove('is-hovering'));
+  const once = new IntersectionObserver(es => { if (es[0].isIntersecting && !dealt) { dealt = true; deal(); once.disconnect(); } }, { threshold: .25 });
+  once.observe(fan);
+  if (window.gsap && !RM) gsap.set($$('.fcard__in', fan), { opacity: 0, y: 160 });
 }
 
 /* ---------- film colour strip (service pages): every swatch opens the studio with that film ---------- */
@@ -413,7 +444,7 @@ $$('[data-filmcount]').forEach(el => { const F = window.FILMS; if (F) el.textCon
 /* ---------- price builder (price-list figures only) ---------- */
 const qBox = $('#quote');
 if (qBox) {
-  const Q = { size: 'mid', svc: new Set(), when: 0 };
+  const Q = { size: 'sedan', svc: new Set(), when: 0 };
   const pre = new URLSearchParams(location.search).get('svc'); if (own(WRAPPI.services, pre)) Q.svc.add(pre);
   /* with a yes in the cookie bar, the builder opens the way the visitor left it (each field checked before use) */
   const saved = (CARRY && CARRY.quote && typeof CARRY.quote === 'object') ? CARRY.quote : STORE.load('quote');
@@ -429,11 +460,11 @@ if (qBox) {
   let saveT; const saveQuote = () => { clearTimeout(saveT); saveT = setTimeout(() => STORE.save('quote', { size: Q.size, svc: [...Q.svc], when: Q.when, car: $('#qCar').value.trim().slice(0, 50), name: $('#qName').value.trim().slice(0, 40) }), 400); };
   addEventListener('wr-consent', e => { if (e.detail) saveQuote(); });
   const WHEN = [['As soon as possible', 'Så snart som mulig'], ['November or December', 'November eller desember'], ['Just checking prices', 'Sjekker bare priser']];
-  const priceOf = s => s.p === 'size:ppf' ? WRAPPI.sizes[Q.size].ppf : s.p === 'size:color' ? WRAPPI.sizes[Q.size].color : s.p;
+  const priceOf = s => typeof s.p === 'string' && s.p.startsWith('size:') ? WRAPPI.sizes[Q.size][s.p.slice(5)] : s.p;
   const quoteUI = () => {
     $('#sizePicks').innerHTML = Object.entries(WRAPPI.sizes).map(([k, v]) => `<button class="pick" role="radio" data-sz="${k}" aria-checked="${k === Q.size}">${tx(v.en, v.no)}<small>${v.hint}</small></button>`).join('');
-    const grp = (title, keys) => `<small>${title}</small><div class="picks">${keys.map(k => { const s = WRAPPI.services[k]; return `<button class="pick" data-v="${k}" aria-pressed="false">${tx(s.en, s.no)}<small>${s.p === null ? tx('on request', 'på forespørsel') : (s.from || (s.p === 'size:ppf' && Q.size === 'xl') ? tx('from ', 'fra ') : '') + nf(priceOf(s))}</small></button>`; }).join('')}</div>`;
-    $('#svcPicks').innerHTML = grp(tx('Protection · pick one', 'Beskyttelse · velg én'), ['ppfFull', 'colorPpf', 'ppfFront']) + grp(tx('Polish · pick one', 'Polering · velg én'), ['shine', 'shineCer', 'polish1', 'polish2']) + grp(tx('Priced after we see the car', 'Prises etter at vi har sett bilen'), ['wrap', 'details', 'fleet', 'tint', 'ceramic']);
+    const grp = (title, keys) => `<small>${title}</small><div class="picks">${keys.map(k => { const s = WRAPPI.services[k]; return `<button class="pick" data-v="${k}" aria-pressed="false">${tx(s.en, s.no)}<small>${priceOf(s) == null ? tx('on request', 'på forespørsel') : tx('from ', 'fra ') + nf(priceOf(s))}</small></button>`; }).join('')}</div>`;
+    $('#svcPicks').innerHTML = grp(tx('Protection · pick one', 'Beskyttelse · velg én'), ['ppfFull', 'colorPpf', 'ppfFront']) + grp(tx('Polish · pick one', 'Polering · velg én'), ['shine', 'shineCer', 'polish1', 'polish2']) + grp(tx('Car wrapping', 'Bilwrapping'), ['wrap']) + grp(tx('Priced after we see the car', 'Prises etter at vi har sett bilen'), ['details', 'fleet', 'tint', 'ceramic']);
     $('#whenPicks').innerHTML = WHEN.map((w, i) => `<button class="pick" role="radio" data-n="${i}" aria-checked="${i === Q.when}">${tx(...w)}</button>`).join('');
     renderQuote();
   };
@@ -441,8 +472,8 @@ if (qBox) {
     $$('#sizePicks [data-sz]').forEach(b => b.setAttribute('aria-checked', b.dataset.sz === Q.size));
     $$('#svcPicks [data-v]').forEach(b => b.setAttribute('aria-pressed', Q.svc.has(b.dataset.v)));
     $$('#whenPicks [data-n]').forEach(b => b.setAttribute('aria-checked', +b.dataset.n === Q.when));
-    const list = [...Q.svc].map(k => WRAPPI.services[k]), priced = list.filter(s => s.p !== null), req = list.length - priced.length;
-    const from = priced.some(s => s.from || (s.p === 'size:ppf' && Q.size === 'xl')), sum = priced.reduce((a, s) => a + priceOf(s), 0);
+    const list = [...Q.svc].map(k => WRAPPI.services[k]), priced = list.filter(s => priceOf(s) != null), req = list.length - priced.length;
+    const from = priced.length > 0, sum = priced.reduce((a, s) => a + priceOf(s), 0);
     $('#estV').textContent = !list.length ? tx('Pick a service', 'Velg en tjeneste') : priced.length ? `${from ? tx('from ', 'fra ') : ''}${nok(sum)}${req ? ' +' : ''}` : tx('On request', 'På forespørsel');
     $('#estNote').textContent = req ? tx(`Plus ${req} item${req > 1 ? 's' : ''} priced after we've seen the car. Price depends on model and design.`, `Pluss ${req} ting som prises etter at vi har sett bilen. Pris avhenger av bilmodell og utforming.`) : tx('Price depends on the car model and design. We confirm the exact price for your car.', 'Pris avhenger av bilmodell og utforming. Vi bekrefter nøyaktig pris for din bil.');
     const car = $('#qCar').value.trim(), name = $('#qName').value.trim(), sz = WRAPPI.sizes[Q.size];
@@ -467,17 +498,17 @@ const footLegal = $('.foot__legal'); if (footLegal) new IntersectionObserver(es 
 (() => {
   const fab = $('#botFab'), box = $('#bot'), log = $('#botLog'); if (!fab) return;
   const A = () => [
-    { k: ['price', 'cost', 'how much', 'pris', 'koster', 'kost'], a: tx(`All prices are starting prices. Full-car PPF from ${nok(30000)} (small), ${nok(33000)} (mid-size), ${nok(36000)} (large/SUV), ${nok(45000)} (XL/van). Front PPF from ${nok(12900)}. Color PPF from ${nok(33000)}. Polishing from ${nok(2990)}. See <a href="${R('prices')}">all prices</a>.`, `Alle priser er fra-priser. PPF hel bil fra ${nok(30000)} (liten), ${nok(33000)} (mellomstor), ${nok(36000)} (stor/SUV), ${nok(45000)} (XL/varebil). Front PPF fra ${nok(12900)}. Farget PPF fra ${nok(33000)}. Polering fra ${nok(2990)}. Se <a href="${R('prices')}">alle priser</a>.`) },
-    { k: ['color', 'colour', 'farge', 'farget'], a: tx(`Color PPF changes the colour and protects the paint in one: car from ${nok(33000)}, SUV from ${nok(38000)}, van from ${nok(45000)}. <a href="${R('cppf')}">Read more</a>.`, `Farget PPF gir ny farge og lakkbeskyttelse i én løsning: personbil fra ${nok(33000)}, SUV fra ${nok(38000)}, varebil fra ${nok(45000)}. <a href="${R('cppf')}">Les mer</a>.`) },
+    { k: ['price', 'cost', 'how much', 'pris', 'koster', 'kost'], a: tx(`All prices are starting prices. Full PPF from ${nok(39000)} (sedan), ${nok(45000)} (SUV), ${nok(50000)} (van). Front PPF package ${nok(16000)}–${nok(22000)}. Color PPF from ${nok(45000)}. Car wrapping from ${nok(27000)}. Polishing from ${nok(2990)}. See <a href="${R('prices')}">all prices</a>.`, `Alle priser er fra-priser. PPF hel bil fra ${nok(39000)} (sedan), ${nok(45000)} (SUV), ${nok(50000)} (varebil). Front PPF-pakke ${nok(16000)}–${nok(22000)}. Farget PPF fra ${nok(45000)}. Bilwrapping fra ${nok(27000)}. Polering fra ${nok(2990)}. Se <a href="${R('prices')}">alle priser</a>.`) },
+    { k: ['color', 'colour', 'farge', 'farget'], a: tx(`Color PPF changes the colour and protects the paint in one: sedan from ${nok(45000)}, SUV from ${nok(53000)}, van from ${nok(58000)}. <a href="${R('cppf')}">Read more</a>.`, `Farget PPF gir ny farge og lakkbeskyttelse i én løsning: sedan fra ${nok(45000)}, SUV fra ${nok(53000)}, varebil fra ${nok(58000)}. <a href="${R('cppf')}">Les mer</a>.`) },
     { k: ['3m', 'avery', '2080', 'swf', 'vinyl', 'pet'], a: tx(`We wrap with vinyl and PET film, including 3M 2080 and Avery Dennison Supreme Wrapping Film. Can't find your colour? We can order it. <a href="${R('wrap')}">Try the colours on a car</a>.`, `Vi folierer med vinyl- og PET-folie, blant annet 3M 2080 og Avery Dennison Supreme Wrapping Film. Finner du ikke fargen? Vi kan bestille den. <a href="${R('wrap')}">Prøv fargene på en bil</a>.`) },
-    { k: ['front'], a: tx(`Front PPF from ${nok(12900)}: front bumper, bonnet, front wings and side mirrors — adapted to the model. <a href="${R('ppf')}#front">More</a>.`, `Front PPF fra ${nok(12900)}: frontfanger, panser, forskjermene og sidespeil — tilpasset bilmodellen. <a href="${R('ppf')}#front">Les mer</a>.`) },
+    { k: ['front'], a: tx(`The front PPF package costs ${nok(16000)}–${nok(22000)}, depending on the car: front bumper, bonnet, front wings and side mirrors. <a href="${R('ppf')}#front">More</a>.`, `Front PPF-pakken koster ${nok(16000)}–${nok(22000)}, avhengig av bilen: frontfanger, panser, forskjermene og sidespeil. <a href="${R('ppf')}#front">Les mer</a>.`) },
     { k: ['film', 'brand', 'folie', 'merke'], a: tx(`Our PPF is PPF Art Design: 216 µm (8.5 mil) total, 165 µm TPU, self-healing top coat, −45 to +115 °C. <a href="${R('ppf')}#film">See the specs</a>.`, `PPF-en vår er PPF Art Design: 216 µm (8,5 mil) totalt, 165 µm TPU, selvreparerende toppcoat, −45 til +115 °C. <a href="${R('ppf')}#film">Se dataene</a>.`) },
     { k: ['day', 'long', 'time', 'dager', 'lenge', 'tid'], a: tx('Full PPF normally takes 3–4 days, depending on the car and the scope. The film needs time to dry and settle before handover.', 'Full PPF tar normalt 3–4 dager, avhengig av bilmodell og omfang. Folien trenger tid til å tørke og stabilisere seg før levering.') },
     { k: ['wash', 'vask'], a: tx("Don't wash the car for the first 48 hours after fitting — and come back for a check about a week later.", 'Ikke vask bilen de første 48 timene etter montering — og kom gjerne tilbake til en etterkontroll omtrent én uke etter.') },
     { k: ['warranty', 'garanti', 'guarantee'], a: tx("Our PPF film has a 10-year manufacturer warranty, under the manufacturer's terms.", 'PPF-folien vår har 10 års produsentgaranti, i henhold til produsentens garantivilkår.') },
     { k: ['polish', 'shine', 'swirl', 'polering', 'riper'], a: tx(`1-step polish from ${nok(2990)}, 2-step from ${nok(4990)}, Full Shine from ${nok(5999)}, Full Shine + ceramic from ${nok(6999)}. <a href="${R('polish')}">More</a>.`, `Polering 1-steg fra ${nok(2990)}, 2-steg fra ${nok(4990)}, Full Shine fra ${nok(5999)}, Full Shine + keramisk fra ${nok(6999)}. <a href="${R('polish')}">Les mer</a>.`) },
     { k: ['ceramic', 'coating', 'keramisk', 'koch'], a: tx(`Koch Chemie ceramic coating, with checks at 12, 24 and 36 months. From ${nok(6999)} together with Full Shine. <a href="${R('polish')}#ceramic">More</a>.`, `Koch Chemie keramisk coating, med kontroll etter 12, 24 og 36 måneder. Fra ${nok(6999)} sammen med Full Shine. <a href="${R('polish')}#ceramic">Les mer</a>.`) },
-    { k: ['wrap', 'chrome', 'stripe', 'logo', 'fleet', 'striper', 'firmabil', 'foliering'], a: tx(`Full colour changes, chrome delete, stripes and fleet graphics are priced after we see the car. <a href="${R('studio')}">Build it in the studio</a> and send it to us.`, `Fargebytte, chrome delete, striper og firmabiler prises etter at vi har sett bilen. <a href="${R('studio')}">Lag det i studioet</a> og send det til oss.`) },
+    { k: ['wrap', 'wrapping', 'chrome', 'stripe', 'logo', 'fleet', 'striper', 'firmabil', 'foliering'], a: tx(`Car wrapping from ${nok(27000)} (sedan) and ${nok(33000)} (SUV) — starting prices. Chrome delete, stripes and fleet graphics are priced after we see the car. <a href="${R('wrap')}">Try the colours in 3D</a>.`, `Bilwrapping fra ${nok(27000)} (sedan) og ${nok(33000)} (SUV) — fra-priser. Chrome delete, striper og firmabiler prises etter at vi har sett bilen. <a href="${R('wrap')}">Prøv fargene i 3D</a>.`) },
     { k: ['where', 'address', 'location', 'map', 'hvor', 'adresse'], a: tx(`We're at ${WRAPPI.address}, at Furuset by IKEA Furuset. <a href="${R('contact')}">Directions</a>.`, `Vi holder til i ${WRAPPI.address}, på Furuset ved IKEA Furuset. <a href="${R('contact')}">Veibeskrivelse</a>.`) },
     { k: ['open', 'hour', 'åpent', 'åpningstid'], a: tx(`Message us on <a href="${wa('Hi Wrappi! When can I come by?')}" target="_blank" rel="noopener">WhatsApp</a> and we'll find a time.`, `Send en melding på <a href="${wa('Hei Wrappi! Når kan jeg komme innom?')}" target="_blank" rel="noopener">WhatsApp</a>, så finner vi en tid.`) },
     { k: ['phone', 'call', 'number', 'ring', 'telefon'], a: tx(`Call ${WRAPPI.phones[0]} or ${WRAPPI.phones[1]}.`, `Ring ${WRAPPI.phones[0]} eller ${WRAPPI.phones[1]}.`) },
@@ -702,19 +733,37 @@ function wipeCar(root, every = 3800) {
   const code = $('[data-wipe-code]', root), name = $('[data-wipe-name]', root), fin = $('[data-wipe-fin]', root);
   const links = $$('[data-wipe-go]', root), q = root.dataset.q || '', carKey = root.dataset.car, carName = root.dataset.carname || '';
   let i = 0, busy = false, timer = 0, vis = false, hold = false;
+  /* band with a live 3D car: the same films go onto a real, rotating car instead of the photo */
+  const three = root.hasAttribute('data-band3d') && $('#bay3d', root);
+  const FIN = t => /krom|chrome/i.test(t) ? 'chrome' : /matt? metal/i.test(t) ? 'matteMetal' : /satin metal/i.test(t) ? 'satinMetal' : /matt/i.test(t) ? 'matte' : /satin/i.test(t) ? 'satin' : /metal|fargeskift|flip/i.test(t) ? 'metallic' : 'gloss';
+  const build = j => { const d = imgs[j].dataset, F = window.FILMS; let r = null, fi = {};
+    if (F && d.film) { const [b, c] = d.film.split(':'); const br = F.brands.find(x => x.k === b); r = br && br.list.find(x => x[0] === c); if (r) fi = F.finishes[r[2]] || {}; }
+    if (r) return { c: r[3], f: fi.pbr || 'gloss', fl: r[4] || null, s: fi.skin || 'solid', dec: false };
+    return d.hex ? { c: d.hex, f: FIN(d.fin || ''), fl: null, s: 'solid', dec: false } : null; };
+  const live = () => three && window.CAR3D && document.documentElement.classList.contains('is-3d');
+  if (three) {
+    let tries = 0;
+    (function wait() {
+      if (window.CAR3D) { const b = build(i); if (b) CAR3D.wrap('s', b); CAR3D.spin('s', true); CAR3D.start(carKey || 'sedan'); return; }
+      if (document.documentElement.classList.contains('no3d') || tries++ > 600) return;
+      setTimeout(wait, 50);
+    })();
+  }
   /* only the first film loads with the page; the others are fetched once the car is (nearly) on screen */
   const fetchAll = () => imgs.forEach(im => { if (!im.getAttribute('src') && im.dataset.src) im.src = im.dataset.src; });
   const ready = im => { fetchAll(); return (im.complete && im.naturalWidth) ? Promise.resolve() : new Promise(r => { im.loading = 'eager'; im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }); };
-  const label = j => {
+  const label = (j, now) => {
     const d = imgs[j].dataset;
     sws.forEach((b, k) => b.setAttribute('aria-pressed', k === j));
     if (carKey) links.forEach(a => a.href = `${R('studio')}?car=${carKey}&film=${encodeURIComponent(d.film)}${q}`);
     const set = () => { if (code) code.textContent = d.code; if (name) name.textContent = d.name; if (fin) fin.textContent = d.fin + (carName ? ' · ' + carName : ''); };
-    if (!film || RM) return set();
+    if (!film || RM || now) return set();
     film.classList.add('is-swap'); setTimeout(() => { set(); film.classList.remove('is-swap'); }, 300);
   };
   const go = async j => {
-    j = (j + n) % n; if (busy || j === i) return; busy = true;
+    j = (j + n) % n; if (busy || j === i) return;
+    if (live()) { label(j, true); const bd = build(j); if (bd) CAR3D.wrap('s', bd); imgs[i].classList.remove('is-on'); imgs[j].classList.add('is-on'); i = j; return; }
+    busy = true;
     const a = imgs[i], b = imgs[j]; await ready(b);
     label(j);
     const done = () => { b.classList.add('is-on'); b.classList.remove('is-next'); a.classList.remove('is-on'); i = j; busy = false; };
@@ -1070,4 +1119,64 @@ function motion() {
     if (document.documentElement.classList.contains('no3d') || tries++ > 400) return;
     setTimeout(wait, 50);
   })();
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   Service pages: a "Try it in 3D" button that follows you down the page
+   and hides while the 3D studio itself (or the footer) is on screen.
+   ════════════════════════════════════════════════════════════════ */
+(() => {
+  const btn = document.querySelector('.try3d'), studio = document.getElementById('studio3d'); if (!btn || !studio) return;
+  const foot = document.querySelector('.foot');
+  let inStudio = false, inFoot = false;
+  const ui = () => { const on = window.scrollY > innerHeight * .55 && !inStudio && !inFoot; btn.classList.toggle('is-on', on); document.body.classList.toggle('try3d-on', on); };
+  new IntersectionObserver(es => es.forEach(e => { inStudio = e.isIntersecting; ui(); }), { threshold: 0, rootMargin: '-15% 0px -15% 0px' }).observe(studio);
+  if (foot) new IntersectionObserver(es => es.forEach(e => { inFoot = e.isIntersecting; ui(); })).observe(foot);
+  addEventListener('scroll', ui, { passive: true }); ui();
+  btn.addEventListener('click', e => {
+    e.preventDefault(); e.stopPropagation();
+    if (window.lenis) lenis.scrollTo(studio, { offset: -76, duration: 1.1 }); else studio.scrollIntoView({ behavior: 'smooth' });
+  }, true);
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   Photo slideshows on the service pages: one full photo at a time in a frame,
+   moving on by itself (paused on hover, off screen or in a hidden tab), with
+   arrows, dots and swipe. Click a photo to open it full size.
+   ════════════════════════════════════════════════════════════════ */
+(() => {
+  const RMq = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-slides]').forEach(box => {
+    const slides = [...box.querySelectorAll('.slides__s')], dots = [...box.querySelectorAll('.slides__dot')], num = box.querySelector('.slides__n b');
+    const n = slides.length; if (n < 2) { box.classList.add('is-single'); return; }
+    const EVERY = 4200; let i = 0, timer = 0, vis = false, hover = false;
+    box.style.setProperty('--every', EVERY + 'ms');
+    const show = j => {
+      j = (j + n) % n; if (j === i) return;
+      slides[j].querySelectorAll('img[loading="lazy"]').forEach(im => im.loading = 'eager');
+      slides[(j + 1) % n].querySelectorAll('img[loading="lazy"]').forEach(im => im.loading = 'eager');
+      slides[i].classList.remove('is-on'); slides[i].classList.add('is-off');
+      const prev = slides[i]; setTimeout(() => prev.classList.remove('is-off'), 900);
+      slides[j].classList.add('is-on');
+      dots.forEach((d, k) => { d.classList.toggle('is-on', k === j); d.classList.toggle('is-done', k < j); });
+      if (num) num.textContent = String(j + 1).padStart(2, '0');
+      i = j; arm();
+    };
+    const arm = () => {
+      clearTimeout(timer); box.classList.remove('is-run');
+      if (!vis || hover || document.hidden) return;
+      void box.offsetWidth; box.classList.add('is-run');
+      timer = setTimeout(() => show(i + 1), RMq ? EVERY * 1.6 : EVERY);
+    };
+    box.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); show(i + +b.dataset.step); }));
+    dots.forEach(d => d.addEventListener('click', e => { e.stopPropagation(); show(+d.dataset.go); }));
+    box.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') { hover = true; arm(); } });
+    box.addEventListener('pointerleave', () => { hover = false; arm(); });
+    let sx = null, sy = 0;
+    box.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; }, { passive: true });
+    box.addEventListener('pointerup', e => { if (sx === null) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = null; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { show(i + (dx < 0 ? 1 : -1)); box.dataset.swiped = '1'; setTimeout(() => delete box.dataset.swiped, 50); } });
+    box.addEventListener('click', e => { if (box.dataset.swiped) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+    document.addEventListener('visibilitychange', arm);
+    new IntersectionObserver(es => es.forEach(e => { vis = e.isIntersecting; arm(); }), { threshold: .35 }).observe(box);
+  });
 })();
