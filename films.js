@@ -125,7 +125,6 @@ window.FILMS = {
         ['CL6500001', 'Rugged Onyx Black', 'tx', '#18191a'], ['CL6530001', 'Rugged Bedrock Grey', 'tx', '#5a5d60'], ['CL6510001', 'Rugged Marsh Green', 'tx', '#4d5a3f'],
         ['CL6490001', 'Rugged Combat Green', 'tx', '#3d4632']
       ]
-    },
-    { k: 'hexis', name: 'Hexis', range: 'Skintac HX20000 / HX30000', short: 'Hexis', list: [] }
+    }
   ]
 };

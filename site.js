@@ -8,20 +8,20 @@ window.WRAPPI = {
   address: 'Strømsveien 324, 1081 Oslo',
   instagram: 'https://www.instagram.com/wrappi__/',
   sizes: { // full-car PPF tiers + Color PPF autumn campaign tiers
-    small: { en: 'Small car', no: 'Liten bil', hint: 'ID.3, MG4, Leaf', ppf: 30000, color: 33000 },
-    mid:   { en: 'Mid-size', no: 'Mellomstor', hint: 'Model 3, i4, Polestar 2', ppf: 33000, color: 33000 },
-    suv:   { en: 'Large / SUV', no: 'Stor / SUV', hint: 'ID.4, Enyaq, Q4 e-tron', ppf: 36000, color: 38000 },
+    small: { en: 'Small car', no: 'Liten bil', hint: 'ID.3, MG4, Leaf', ppf: 30000, color: 33000, from: true },
+    mid:   { en: 'Mid-size', no: 'Mellomstor', hint: 'Model 3, i4, Polestar 2', ppf: 33000, color: 33000, from: true },
+    suv:   { en: 'Large / SUV', no: 'Stor / SUV', hint: 'ID.4, Enyaq, Q4 e-tron', ppf: 36000, color: 38000, from: true },
     xl:    { en: 'XL / van', no: 'XL / varebil', hint: 'ID. Buzz, Transporter', ppf: 45000, color: 45000, from: true }
   },
   services: { // g = only one per group · p = price (number, 'size:ppf', 'size:color') · null = on request
-    ppfFull:  { g: 'ppf', en: 'PPF · full car', no: 'PPF · hel bil', p: 'size:ppf' },
-    colorPpf: { g: 'ppf', en: 'Color PPF · autumn price', no: 'Farget PPF · høstpris', p: 'size:color', from: true },
+    ppfFull:  { g: 'ppf', en: 'PPF · full car', no: 'PPF · hel bil', p: 'size:ppf', from: true },
+    colorPpf: { g: 'ppf', en: 'Color PPF', no: 'Farget PPF', p: 'size:color', from: true },
     ppfFront: { g: 'ppf', en: 'Front PPF', no: 'Front PPF', p: 12900, from: true },
-    shine:    { g: 'shine', en: 'Full Shine', no: 'Full Shine', p: 5999 },
-    shineCer: { g: 'shine', en: 'Full Shine + ceramic', no: 'Full Shine + keramisk', p: 6999 },
-    polish1:  { g: 'shine', en: '1-step polish', no: 'Polering 1-trinn', p: 2990, from: true },
-    polish2:  { g: 'shine', en: '2-step polish', no: 'Polering 2-trinn', p: 4990, from: true },
-    wrap:     { en: 'Colour-change wrap', no: 'Fargebytte med folie', p: null },
+    shine:    { g: 'shine', en: 'Full Shine', no: 'Full Shine', p: 5999, from: true },
+    shineCer: { g: 'shine', en: 'Full Shine + ceramic', no: 'Full Shine + keramisk', p: 6999, from: true },
+    polish1:  { g: 'shine', en: '1-step polish', no: 'Polering 1-steg', p: 2990, from: true },
+    polish2:  { g: 'shine', en: '2-step polish', no: 'Polering 2-steg', p: 4990, from: true },
+    wrap:     { en: 'Car wrap · vinyl or PET', no: 'Bilwrapping · vinyl eller PET', p: null },
     details:  { en: 'Chrome delete / stripes / details', no: 'Chrome delete / striper / detaljer', p: null },
     fleet:    { en: 'Fleet graphics', no: 'Firmabil / profilering', p: null },
     tint:     { en: 'Window tint', no: 'Vindusfilm', p: null },
@@ -162,7 +162,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && menu && menu.classL
 /* ---------- marquee ---------- */
 const mqEl = $('#mq');
 if (mqEl) {
-  const words = [tx('Paint protection film', 'Lakkbeskyttelse'), tx('Color PPF', 'Farget PPF'), tx('Car wrapping', 'Bilfoliering'), tx('Ceramic coating', 'Keramisk coating'), 'Full Shine', tx('Window tint', 'Vindusfilm'), '3M 2080 · Avery Dennison · Hexis', 'Drive different', 'Strømsveien 324 · Oslo'];
+  const words = [tx('Paint protection film', 'Lakkbeskyttelse'), tx('Color PPF', 'Farget PPF'), tx('Car wrapping', 'Bilfoliering'), tx('Ceramic coating', 'Keramisk coating'), 'Full Shine', tx('Window tint', 'Vindusfilm'), 'Vinyl · PET · 3M 2080 · Avery Dennison', 'Drive different', 'Strømsveien 324 · Oslo'];
   const one = words.map(w => `<span class="marquee__item">${w}<i></i></span>`).join('');
   mqEl.innerHTML = one + one + one;
 }
@@ -467,16 +467,16 @@ const footLegal = $('.foot__legal'); if (footLegal) new IntersectionObserver(es 
 (() => {
   const fab = $('#botFab'), box = $('#bot'), log = $('#botLog'); if (!fab) return;
   const A = () => [
-    { k: ['price', 'cost', 'how much', 'pris', 'koster', 'kost'], a: tx(`Full-car PPF: ${nok(30000)} (small), ${nok(33000)} (mid-size), ${nok(36000)} (large/SUV), from ${nok(45000)} (XL/van). Front PPF from ${nok(12900)}. Full Shine ${nok(5999)}. See <a href="${R('prices')}">all prices</a>.`, `PPF hel bil: ${nok(30000)} (liten), ${nok(33000)} (mellomstor), ${nok(36000)} (stor/SUV), fra ${nok(45000)} (XL/varebil). Front PPF fra ${nok(12900)}. Full Shine ${nok(5999)}. Se <a href="${R('prices')}">alle priser</a>.`) },
-    { k: ['color', 'colour', 'farge', 'farget', 'kampanje', 'campaign'], a: tx(`Color PPF autumn campaign: car from ${nok(33000)}, SUV from ${nok(38000)}, van from ${nok(45000)}, with a 10-year warranty. Booking now for November & December. <a href="${R('ppf')}#color-ppf">Read more</a>.`, `Høstkampanje farget PPF: personbil fra ${nok(33000)}, SUV fra ${nok(38000)}, varebil fra ${nok(45000)}, med 10 års garanti. Vi tar imot booking for november og desember. <a href="${R('ppf')}#color-ppf">Les mer</a>.`) },
-    { k: ['3m', 'avery', 'hexis', '2080', 'swf'], a: tx(`We wrap with 3M 2080, Avery Dennison Supreme Wrapping Film and Hexis. <a href="${R('studio')}">Try the colours on a car</a>.`, `Vi folierer med 3M 2080, Avery Dennison Supreme Wrapping Film og Hexis. <a href="${R('studio')}">Prøv fargene på en bil</a>.`) },
-    { k: ['front'], a: tx(`Front PPF from ${nok(12900)}: whole bonnet, front bumper, both front wings, both A-pillars, both side mirrors and the headlights.`, `Front PPF fra ${nok(12900)}: hele panseret, frontfanger, begge forskjermene, begge A-stolpene, begge sidespeilene og frontlyktene.`) },
-    { k: ['film', 'brand', 'titanium', 'folie', 'merke'], a: tx(`Our PPF is PPF Art Design Titanium: 216 µm total, 165 µm TPU, self-healing top coat, −45 to +115 °C. <a href="${R('ppf')}#film">See the specs</a>.`, `PPF-en vår er PPF Art Design Titanium: 216 µm totalt, 165 µm TPU, selvhelende toppcoat, −45 til +115 °C. <a href="${R('ppf')}#film">Se tallene</a>.`) },
-    { k: ['day', 'long', 'time', 'dager', 'lenge', 'tid'], a: tx('PPF takes 3–4 days: 20–24 working hours of fitting, then about 24 hours for the film to settle before we check every edge.', 'PPF tar 3–4 dager: 20–24 arbeidstimer montering, så ca. 24 timer for at filmen skal stabilisere seg før vi sjekker alle kanter.') },
-    { k: ['wash', 'vask'], a: tx("Don't wash it for the first 48–72 hours after pick-up.", 'Ikke vask bilen de første 48–72 timene etter henting.') },
-    { k: ['warranty', 'garanti', 'guarantee'], a: tx("Up to 10 years' manufacturer warranty on film and fitting.", 'Opptil 10 års produsentgaranti på film og montering.') },
-    { k: ['polish', 'shine', 'swirl', 'polering', 'riper'], a: tx(`1-step polish from ${nok(2990)}, 2-step from ${nok(4990)}, Full Shine ${nok(5999)}, Full Shine + ceramic ${nok(6999)}. <a href="${R('polish')}">More</a>.`, `Polering 1-trinn fra ${nok(2990)}, 2-trinn fra ${nok(4990)}, Full Shine ${nok(5999)}, Full Shine + keramisk ${nok(6999)}. <a href="${R('polish')}">Mer</a>.`) },
-    { k: ['ceramic', 'coating', 'keramisk', 'koch'], a: tx(`Koch Chemie ceramic, with checks at 12, 24 and 36 months. ${nok(6999)} together with Full Shine.`, `Koch Chemie keramisk coating, med kontroll etter 12, 24 og 36 måneder. ${nok(6999)} sammen med Full Shine.`) },
+    { k: ['price', 'cost', 'how much', 'pris', 'koster', 'kost'], a: tx(`All prices are starting prices. Full-car PPF from ${nok(30000)} (small), ${nok(33000)} (mid-size), ${nok(36000)} (large/SUV), ${nok(45000)} (XL/van). Front PPF from ${nok(12900)}. Color PPF from ${nok(33000)}. Polishing from ${nok(2990)}. See <a href="${R('prices')}">all prices</a>.`, `Alle priser er fra-priser. PPF hel bil fra ${nok(30000)} (liten), ${nok(33000)} (mellomstor), ${nok(36000)} (stor/SUV), ${nok(45000)} (XL/varebil). Front PPF fra ${nok(12900)}. Farget PPF fra ${nok(33000)}. Polering fra ${nok(2990)}. Se <a href="${R('prices')}">alle priser</a>.`) },
+    { k: ['color', 'colour', 'farge', 'farget'], a: tx(`Color PPF changes the colour and protects the paint in one: car from ${nok(33000)}, SUV from ${nok(38000)}, van from ${nok(45000)}. <a href="${R('cppf')}">Read more</a>.`, `Farget PPF gir ny farge og lakkbeskyttelse i én løsning: personbil fra ${nok(33000)}, SUV fra ${nok(38000)}, varebil fra ${nok(45000)}. <a href="${R('cppf')}">Les mer</a>.`) },
+    { k: ['3m', 'avery', '2080', 'swf', 'vinyl', 'pet'], a: tx(`We wrap with vinyl and PET film, including 3M 2080 and Avery Dennison Supreme Wrapping Film. Can't find your colour? We can order it. <a href="${R('wrap')}">Try the colours on a car</a>.`, `Vi folierer med vinyl- og PET-folie, blant annet 3M 2080 og Avery Dennison Supreme Wrapping Film. Finner du ikke fargen? Vi kan bestille den. <a href="${R('wrap')}">Prøv fargene på en bil</a>.`) },
+    { k: ['front'], a: tx(`Front PPF from ${nok(12900)}: front bumper, bonnet, front wings and side mirrors — adapted to the model. <a href="${R('ppf')}#front">More</a>.`, `Front PPF fra ${nok(12900)}: frontfanger, panser, forskjermene og sidespeil — tilpasset bilmodellen. <a href="${R('ppf')}#front">Les mer</a>.`) },
+    { k: ['film', 'brand', 'folie', 'merke'], a: tx(`Our PPF is PPF Art Design: 216 µm (8.5 mil) total, 165 µm TPU, self-healing top coat, −45 to +115 °C. <a href="${R('ppf')}#film">See the specs</a>.`, `PPF-en vår er PPF Art Design: 216 µm (8,5 mil) totalt, 165 µm TPU, selvreparerende toppcoat, −45 til +115 °C. <a href="${R('ppf')}#film">Se dataene</a>.`) },
+    { k: ['day', 'long', 'time', 'dager', 'lenge', 'tid'], a: tx('Full PPF normally takes 3–4 days, depending on the car and the scope. The film needs time to dry and settle before handover.', 'Full PPF tar normalt 3–4 dager, avhengig av bilmodell og omfang. Folien trenger tid til å tørke og stabilisere seg før levering.') },
+    { k: ['wash', 'vask'], a: tx("Don't wash the car for the first 48 hours after fitting — and come back for a check about a week later.", 'Ikke vask bilen de første 48 timene etter montering — og kom gjerne tilbake til en etterkontroll omtrent én uke etter.') },
+    { k: ['warranty', 'garanti', 'guarantee'], a: tx("Our PPF film has a 10-year manufacturer warranty, under the manufacturer's terms.", 'PPF-folien vår har 10 års produsentgaranti, i henhold til produsentens garantivilkår.') },
+    { k: ['polish', 'shine', 'swirl', 'polering', 'riper'], a: tx(`1-step polish from ${nok(2990)}, 2-step from ${nok(4990)}, Full Shine from ${nok(5999)}, Full Shine + ceramic from ${nok(6999)}. <a href="${R('polish')}">More</a>.`, `Polering 1-steg fra ${nok(2990)}, 2-steg fra ${nok(4990)}, Full Shine fra ${nok(5999)}, Full Shine + keramisk fra ${nok(6999)}. <a href="${R('polish')}">Les mer</a>.`) },
+    { k: ['ceramic', 'coating', 'keramisk', 'koch'], a: tx(`Koch Chemie ceramic coating, with checks at 12, 24 and 36 months. From ${nok(6999)} together with Full Shine. <a href="${R('polish')}#ceramic">More</a>.`, `Koch Chemie keramisk coating, med kontroll etter 12, 24 og 36 måneder. Fra ${nok(6999)} sammen med Full Shine. <a href="${R('polish')}#ceramic">Les mer</a>.`) },
     { k: ['wrap', 'chrome', 'stripe', 'logo', 'fleet', 'striper', 'firmabil', 'foliering'], a: tx(`Full colour changes, chrome delete, stripes and fleet graphics are priced after we see the car. <a href="${R('studio')}">Build it in the studio</a> and send it to us.`, `Fargebytte, chrome delete, striper og firmabiler prises etter at vi har sett bilen. <a href="${R('studio')}">Lag det i studioet</a> og send det til oss.`) },
     { k: ['where', 'address', 'location', 'map', 'hvor', 'adresse'], a: tx(`We're at ${WRAPPI.address}, at Furuset by IKEA Furuset. <a href="${R('contact')}">Directions</a>.`, `Vi holder til i ${WRAPPI.address}, på Furuset ved IKEA Furuset. <a href="${R('contact')}">Veibeskrivelse</a>.`) },
     { k: ['open', 'hour', 'åpent', 'åpningstid'], a: tx(`Message us on <a href="${wa('Hi Wrappi! When can I come by?')}" target="_blank" rel="noopener">WhatsApp</a> and we'll find a time.`, `Send en melding på <a href="${wa('Hei Wrappi! Når kan jeg komme innom?')}" target="_blank" rel="noopener">WhatsApp</a>, så finner vi en tid.`) },
@@ -863,7 +863,7 @@ function motion() {
   if (isHome) {
     heroGo();
     gsap.fromTo('.hero__title .ch', { yPercent: 115, rotate: 7 }, { yPercent: 0, rotate: 0, duration: 1.15, stagger: .024, ease: 'expo.out', delay: .1 });
-    gsap.fromTo(['.hero__eyebrow', '.hero__kicker', '.hero__motto', '.hero__sub', '.hero__ctas', '.hero__now'], { autoAlpha: 0, y: 22, filter: 'blur(6px)' }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 1, stagger: .07, ease: 'expo.out', delay: .25, clearProps: 'filter' });
+    gsap.fromTo(['.hero__eyebrow', '.hero__kicker', '.hero__motto', '.hero__sub', '.hero__ctas', '.hub a', '.hero__now'], { autoAlpha: 0, y: 22, filter: 'blur(6px)' }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 1, stagger: .07, ease: 'expo.out', delay: .25, clearProps: 'filter' });
     gsap.fromTo('.hero__stage', { autoAlpha: 0, x: -50 }, { autoAlpha: 1, x: 0, duration: 1.6, ease: 'expo.out', delay: .15, clearProps: 'transform' });
   }
   const ph = $('.phead'); if (ph) gsap.fromTo($$('.phead__crumbs,.phead .tag,.phead h1 .h-line > span,.phead__lead,.phead .acts,.phead__media figure', ph), { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .9, stagger: .05, ease: 'expo.out', delay: .1 });
@@ -934,4 +934,140 @@ function motion() {
   pre();
   ScrollTrigger.refresh();
 }
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   Mini 3D studio — one per service page, showing only that service.
+   Markup: <div class="sband mstu" data-mstu="ppf|cppf|wrap|polish" data-car="suv">…<div id="bay3d">
+   Uses the shared 3D engine (studio.js → window.CAR3D), loaded after the page is up.
+   ════════════════════════════════════════════════════════════════ */
+(() => {
+  const box = document.querySelector('.mstu[data-mstu]'); if (!box) return;
+  const WR = window.WR || { lang: 'no', routes: {} }, NO = WR.lang === 'no';
+  const tx = (en, no) => NO ? no : en;
+  const $ = (s, c = box) => c.querySelector(s), $$ = (s, c = box) => [...c.querySelectorAll(s)];
+  const kind = box.dataset.mstu, WA = (window.WRAPPI && WRAPPI.wa) || '4746228133';
+  const CARS = { suv: ['Tesla Model Y', 'Tesla Model Y'], sedan: ['Tesla Model 3', 'Tesla Model 3'], rrs: ['Range Rover Sport', 'Range Rover Sport'], s90: ['Volvo S90', 'Volvo S90'], eclass: ['Mercedes E-Class', 'Mercedes E-klasse'], sports: ['Porsche 911', 'Porsche 911'], r8: ['Audi R8', 'Audi R8'] };
+  const PAINT = [['#111214', 'Black', 'Svart'], ['#ecece9', 'White', 'Hvit'], ['#8a8d92', 'Silver', 'Sølv'], ['#55585d', 'Grey', 'Grå'], ['#1d3f7a', 'Blue', 'Blå'], ['#8e1b22', 'Red', 'Rød']];
+  const CPPF = [['#86898e', null, 'Satin titanium', 'Satin titan', 'satin'], ['#1e1830', '#7a4fc4', 'Midnight purple', 'Midnattslilla', 'satin'], ['#6cc824', '#d8c21a', 'Lime, gold shimmer', 'Lime, gullskimmer', 'gloss'], ['#a3101a', null, 'Satin red', 'Satin rød', 'satin'], ['#c4846a', null, 'Rose gold', 'Rosegull', 'satin'], ['#7d8084', null, 'Nardo grey', 'Nardo grå', 'gloss'], ['#111214', null, 'Black', 'Svart', 'matte'], ['#eeeeec', null, 'Pearl white', 'Perlehvit', 'gloss'], ['#1340a8', null, 'Deep blue', 'Dyp blå', 'metallic'], ['#1f4a33', null, 'British green', 'Britisk grønn', 'gloss'], ['#c8b48c', null, 'Sand', 'Sand', 'satin'], ['#e2621b', null, 'Orange', 'Oransje', 'gloss'], ['#2b2f6b', '#8b2f7a', 'Purple flip', 'Lilla fargeskift', 'metallic'], ['#d9dbde', null, 'Satin silver', 'Satin sølv', 'satin']];
+  const FIN = { gloss: ['Gloss', 'Blank'], satin: ['Satin', 'Satin'], matte: ['Matte', 'Matt'], metallic: ['Metallic', 'Metallic'] };
+  const TINT = { none: ['Factory', 'Fabrikk'], t35: ['35 %', '35 %'], t20: ['20 %', '20 %'], t5: ['5 %', '5 %'] };
+  const L = a => tx(a[0], a[1]);
+  const st = { car: box.dataset.car || 'suv', paint: PAINT[0][0], cover: 'full', col: 0, fin: CPPF[0][4], film: null, wfin: 'all', brand: '3m', chrome: false, tint: 'none', stage: 'two', cer: false, spin: true };
+  const read = $('.mstu__read b'), readK = $('.mstu__read .mono');
+  const films = () => (window.FILMS && FILMS.brands || []).filter(b => b.list && b.list.length);
+  const fin = k => (window.FILMS && FILMS.finishes[k]) || { pbr: 'gloss' };
+  const filmOf = id => { if (!id) return null; const [b, c] = id.split(':'); const br = films().find(x => x.k === b); const r = br && br.list.find(x => x[0] === c); return r ? { br, code: r[0], name: r[1], fin: r[2], c: r[3], fl: r[4] || null } : null; };
+  const deep = h => { const n = parseInt(h.slice(1), 16), f = .82; const r = Math.round((n >> 16 & 255) * f), g = Math.round((n >> 8 & 255) * f), b = Math.round((n & 255) * f); return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join(''); };
+
+  /* ---- build the controls this service needs ---- */
+  const grp = (k, inner) => `<div class="mstu__grp"><span class="mono">${k}</span>${inner}</div>`;
+  const pickRow = (name, items, cur) => `<div class="mstu__row" role="group" data-g="${name}">${items.map(([v, t]) => `<button type="button" class="pick" data-v="${v}" aria-pressed="${v === cur}">${t}</button>`).join('')}</div>`;
+  const sws = (name, items, cur) => `<div class="mstu__sws" role="group" data-g="${name}">${items.map(([v, c, fl, t]) => `<button type="button" class="sw" data-v="${v}" style="--sw:${c}${fl ? ';--fl:' + fl : ''}"${fl ? ' data-flip' : ''} aria-label="${t}" title="${t}" aria-pressed="${String(v) === String(cur)}"></button>`).join('')}</div>`;
+  const ctr = $('.mstu__ctrls');
+  const carRow = pickRow('car', Object.entries(CARS).map(([k, v]) => [k, L(v)]), st.car);
+  let h = '';
+  if (kind === 'ppf') {
+    h += grp(tx('Coverage', 'Dekning'), `<div class="seg" role="group" data-g="cover" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button type="button" data-v="full" aria-pressed="true">${tx('Full PPF', 'Hel bil')}</button><button type="button" data-v="front" aria-pressed="false">Front PPF</button></div>`);
+    h += grp(tx('Your car\'s paint', 'Bilens lakk'), sws('paint', PAINT.map(p => [p[0], p[0], null, tx(p[1], p[2])]), st.paint));
+  } else if (kind === 'cppf') {
+    h += grp(tx('Colour', 'Farge'), sws('col', CPPF.map((p, i) => [i, p[0], p[1], tx(p[2], p[3])]), 0));
+    h += grp(tx('Finish', 'Finish'), `<div class="seg" role="group" data-g="fin">${Object.entries(FIN).map(([k, v]) => `<button type="button" data-v="${k}" aria-pressed="${k === st.fin}">${L(v)}</button>`).join('')}</div>`);
+  } else if (kind === 'wrap') {
+    h += grp(tx('Film', 'Folie'), `<div class="mstu__row" role="group" data-g="brand">${films().map(b => `<button type="button" class="pick" data-v="${b.k}" aria-pressed="${b.k === st.brand}">${b.name}<small>${b.range}</small></button>`).join('')}</div>`);
+    h += grp(tx('Finish', 'Finish'), `<div class="mstu__row" role="group" data-g="wfin"></div>`);
+    h += grp(tx('Colours', 'Farger'), `<div class="mstu__sws" role="group" data-g="film"></div><button type="button" class="mstu__more" hidden>${tx('Show more colours', 'Vis flere farger')}</button>`);
+    h += grp(tx('Details', 'Detaljer'), `<div class="mstu__row" role="group" data-g="chrome"><button type="button" class="pick" data-v="1" aria-pressed="false">Chrome delete</button></div>`);
+    h += grp(tx('Window tint', 'Vindusfilm'), pickRow('tint', Object.entries(TINT).map(([k, v]) => [k, L(v)]), 'none'));
+  } else if (kind === 'polish') {
+    h += grp(tx('Treatment', 'Behandling'), `<div class="seg" role="group" data-g="stage" style="grid-template-columns:repeat(3,minmax(0,1fr))"><button type="button" data-v="before" aria-pressed="false">${tx('Before', 'Før')}</button><button type="button" data-v="one" aria-pressed="false">${tx('1-step', '1-steg')}</button><button type="button" data-v="two" aria-pressed="true">${tx('2-step', '2-steg')}</button></div>`);
+    h += grp(tx('Ceramic coating', 'Keramisk coating'), `<div class="mstu__row" role="group" data-g="cer"><button type="button" class="pick" data-v="1" aria-pressed="false">${tx('Add ceramic coating', 'Legg til keramisk coating')}</button></div>`);
+    h += grp(tx('Paint colour', 'Lakkfarge'), sws('paint', PAINT.map(p => [p[0], p[0], null, tx(p[1], p[2])]), st.paint));
+  }
+  h += grp(tx('Car', 'Bil'), carRow);
+  if (ctr) ctr.innerHTML = h;
+
+  /* wrap: the film library, filtered */
+  const WF = [['all', tx('All', 'Alle'), null], ['g', tx('Gloss', 'Blank'), /^(g|gp)$/], ['s', 'Satin', /^(s|sm|sf)$/], ['m', tx('Matte', 'Matt'), /^(m|mm)$/], ['gm', 'Metallic', /^(gm|sm|mm)$/], ['ch', tx('Chrome', 'Krom'), /^ch$/], ['fl', tx('Colour flip', 'Fargeskift'), /^(fl|sf)$/]];
+  let shown = 30;
+  function drawFilms() {
+    const br = films().find(b => b.k === st.brand) || films()[0]; if (!br) return;
+    const f = WF.find(x => x[0] === st.wfin) || WF[0];
+    const list = br.list.filter(r => !f[2] || f[2].test(r[2]));
+    const fr = $('[data-g="wfin"]'); if (fr) fr.innerHTML = WF.filter(w => !w[2] || br.list.some(r => w[2].test(r[2]))).map(w => `<button type="button" class="pick" data-v="${w[0]}" aria-pressed="${w[0] === st.wfin}">${w[1]}</button>`).join('');
+    const g = $('[data-g="film"]'); if (!g) return;
+    g.innerHTML = list.slice(0, shown).map(r => { const id = br.k + ':' + r[0]; return `<button type="button" class="sw" data-v="${id}" style="--sw:${r[3]}${r[4] ? ';--fl:' + r[4] : ''}"${r[4] ? ' data-flip' : ''} aria-label="${br.short || br.name} ${r[0]} ${r[1]}" title="${r[1]} · ${r[0]}" aria-pressed="${id === st.film}"></button>`; }).join('');
+    const m = $('.mstu__more'); if (m) m.hidden = list.length <= shown;
+  }
+
+  /* ---- what the car shows ---- */
+  const C = () => window.CAR3D;
+  function apply() {
+    const c3 = C();
+    let b, s = { mode: 'wrap', ppf: 4, cer: 0, chrome: false, tint: 'none' }, name = '', code = '';
+    if (kind === 'ppf') {
+      b = { c: st.paint, f: 'gloss', fl: null, s: 'solid', dec: false };
+      s = Object.assign(s, { mode: 'ppf', ppf: st.cover === 'front' ? 1 : 4 });
+      name = st.cover === 'front' ? 'Front PPF' : tx('Full PPF · every painted panel', 'PPF på hele bilen');
+      code = tx('Clear self-healing film', 'Klar, selvreparerende folie');
+    } else if (kind === 'cppf') {
+      const p = CPPF[st.col];
+      b = { c: p[0], f: st.fin, fl: p[1], s: 'solid', dec: false };
+      name = tx(p[2], p[3]); code = tx('Color PPF · ', 'Farget PPF · ') + L(FIN[st.fin]);
+    } else if (kind === 'wrap') {
+      const fm = filmOf(st.film) || filmOf(films()[0] && films()[0].k + ':' + films()[0].list[0][0]);
+      if (fm && !st.film) st.film = fm.br.k + ':' + fm.code;
+      const fi = fm ? fin(fm.fin) : { pbr: 'gloss' };
+      b = fm ? { c: fm.c, f: fi.pbr || 'gloss', fl: fm.fl, s: fi.skin || 'solid', dec: false } : { c: '#86898e', f: 'satin', fl: null, s: 'solid', dec: false };
+      s = Object.assign(s, { chrome: st.chrome, tint: st.tint });
+      name = fm ? fm.name : ''; code = fm ? `${fm.br.short || fm.br.name} · ${fm.code}` : '';
+      const extra = [st.chrome ? 'chrome delete' : '', st.tint !== 'none' ? tx('tint ', 'vindusfilm ') + L(TINT[st.tint]) : ''].filter(Boolean).join(' + ');
+      if (extra) code += ' + ' + extra;
+    } else if (kind === 'polish') {
+      const c = st.stage === 'two' ? deep(st.paint) : st.paint;
+      b = { c, f: st.stage === 'before' ? 'satin' : 'gloss', fl: null, s: 'solid', dec: false };
+      s = Object.assign(s, { cer: st.cer ? 1 : 0 });
+      name = ({ before: tx('Before: dull, swirled paint', 'Før: matt lakk med vaskeriper'), one: tx('1-step polish', '1-steg polering'), two: tx('2-step polish', '2-steg polering') })[st.stage] + (st.cer ? tx(' + ceramic coating', ' + keramisk coating') : '');
+      code = tx('Illustration · result depends on your paint', 'Illustrasjon · resultatet avhenger av lakken');
+    }
+    if (read) read.textContent = name;
+    if (readK) readK.textContent = code + ' · ' + L(CARS[st.car]);
+    const wa = $('.mstu__wa'); if (wa) wa.href = `https://wa.me/${WA}?text=${encodeURIComponent(tx('Hi Wrappi! I tried this in the 3D studio: ', 'Hei Wrappi! Jeg prøvde dette i 3D-studioet: ') + name + ' (' + code + ') — ' + L(CARS[st.car]) + '. ' + tx('Could I get a price?', 'Kan jeg få en pris?'))}`;
+    const op = $('.mstu__open'); if (op) {
+      const q = new URLSearchParams({ car: st.car });
+      if (kind === 'ppf') q.set('mode', 'ppf'); if (kind === 'wrap' && st.film) q.set('film', st.film); if (kind === 'polish' && st.cer) q.set('ceramic', '1');
+      op.href = (WR.routes.studio || 'design-din-bil') + '?' + q.toString();
+    }
+    if (!c3) return;
+    c3.wrap('s', b); c3.setState('s', s);
+  }
+
+  /* ---- clicks ---- */
+  box.addEventListener('click', e => {
+    const more = e.target.closest('.mstu__more'); if (more) { shown += 60; drawFilms(); return; }
+    const btn = e.target.closest('[data-g] [data-v]'); if (!btn) return;
+    const g = btn.closest('[data-g]').dataset.g, v = btn.dataset.v;
+    if (g === 'chrome' || g === 'cer') { const on = btn.getAttribute('aria-pressed') !== 'true'; btn.setAttribute('aria-pressed', on); st[g === 'chrome' ? 'chrome' : 'cer'] = on; apply(); return; }
+    $$('[data-v]', btn.closest('[data-g]')).forEach(x => x.setAttribute('aria-pressed', x === btn));
+    if (g === 'car') { st.car = v; const c3 = C(); if (c3) c3.setCar(v); }
+    else if (g === 'col') { st.col = +v; st.fin = CPPF[+v][4]; $$('[data-g="fin"] [data-v]').forEach(x => x.setAttribute('aria-pressed', x.dataset.v === st.fin)); }
+    else if (g === 'brand') { st.brand = v; st.wfin = 'all'; shown = 30; drawFilms(); return; }
+    else if (g === 'wfin') { st.wfin = v; shown = 30; drawFilms(); return; }
+    else st[g] = v;
+    apply();
+  });
+  /* camera */
+  $$('[data-mv]').forEach(b => b.addEventListener('click', () => { const c3 = C(); if (!c3) return; $$('[data-mv]').forEach(x => x.setAttribute('aria-pressed', x === b)); st.spin = false; c3.spin('s', false); c3.view('s', b.dataset.mv); const sp = $('.mstu__spin'); if (sp) sp.setAttribute('aria-pressed', 'false'); }));
+  const sp = $('.mstu__spin'); if (sp) sp.addEventListener('click', () => { const c3 = C(); st.spin = !st.spin; sp.setAttribute('aria-pressed', st.spin); if (c3) { if (st.spin) c3.view('s', 'threeq'); c3.spin('s', st.spin); } });
+
+  if (kind === 'wrap') { const br = films()[0]; st.brand = br ? br.k : '3m'; drawFilms(); }
+  apply();
+
+  /* ---- engine: wait for studio.js (loaded lazily by the page), then start ---- */
+  let tries = 0;
+  (function wait() {
+    if (window.CAR3D) { const c3 = C(); apply(); c3.spin('s', true); c3.start(st.car); return; }
+    if (document.documentElement.classList.contains('no3d') || tries++ > 400) return;
+    setTimeout(wait, 50);
+  })();
 })();

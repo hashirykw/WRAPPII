@@ -48,6 +48,11 @@
       "permanent": true
     },
     {
+      "source": "/color-ppf",
+      "destination": "/en-color-ppf",
+      "permanent": true
+    },
+    {
       "source": "/home",
       "destination": "/",
       "permanent": true
