@@ -203,35 +203,146 @@ $$('[data-map]').forEach(b => b.addEventListener('click', () => {
   box.appendChild(f); box.classList.add('is-on'); b.remove();
 }));
 
-/* ---------- before / after ---------- */
+/* ---------- before / after: plays through the comparisons on its own. Each one slides in over the last, the line sweeps
+   across, then the next. Holds still while the pointer or keyboard focus is on it, off screen, or in a hidden tab;
+   stops for good once the visitor drags the line or flips (they're in charge then) — the Pause / Play button starts it again. ---------- */
 const baBox = $('#baBox');
 if (baBox) {
   const BA = [
-    { b: 'ba-chrome-before.webp', a: 'ba-chrome-after.webp', m: 'slide', ar: '1400/545', cap: ['Tesla Model S · chrome delete', 'Tesla Model S · chrome delete'], l: [['Before', 'Før'], ['After', 'Etter']], alt: [['Tesla rear with chrome trim', 'Tesla bakfra med kromlister'], ['The same Tesla with the chrome trim in black', 'Den samme Teslaen med listene i svart']] },
-    { b: 'ba-bmw-before.webp', a: 'ba-bmw-after.webp', m: 'slide', ar: '1', cap: ['BMW 3 Series · stripes taped out, then laid', 'BMW 3-serie · striper teipet opp, så lagt'], l: [['Taped', 'Teipet'], ['Striped', 'Ferdig']], alt: [['White BMW with stripe lines taped on the bonnet', 'Hvit BMW med stripene teipet opp på panseret'], ['The same BMW with black twin stripes', 'Den samme BMW-en med doble svarte striper']] },
-    { b: 'ba-explorer-before.webp', a: 'ba-explorer-after.webp', m: 'fade', ar: '1', cap: ['Ford Explorer · taped for PPF, then finished', 'Ford Explorer · teipet for PPF, så ferdig'], l: [['Taped', 'Teipet'], ['Finished', 'Ferdig']], alt: [['Black Ford Explorer with green tape around the panels', 'Svart Ford Explorer med grønn teip rundt panelene'], ['The same Ford Explorer after PPF', 'Den samme Ford Exploreren etter PPF']] },
-    { b: 'hood-5050.webp', a: 'hood-5050.webp', m: 'still', ar: '1', cap: ['Left half polished · right half as it came in', 'Venstre halvdel polert · høyre som den kom inn'], l: [['Polished', 'Polert'], ['Untouched', 'Urørt']], alt: [['Black bonnet, left half polished and right half untouched', 'Svart panser, venstre halvdel polert og høyre urørt'], ['', '']] }
+    { b: 'ba-chrome-before.webp', a: 'ba-chrome-after.webp', m: 'slide', fit: 'contain', cap: ['Tesla Model S · chrome delete', 'Tesla Model S · chrome delete'], l: [['Before', 'Før'], ['After', 'Etter']], alt: [['Tesla rear with chrome trim', 'Tesla bakfra med kromlister'], ['The same Tesla with the chrome trim in black', 'Den samme Teslaen med listene i svart']] },
+    { b: 'ba-bmw-before.webp', a: 'ba-bmw-after.webp', m: 'slide', pos: '50% 52%', cap: ['BMW 3 Series · stripes taped out, then laid', 'BMW 3-serie · striper teipet opp, så lagt'], l: [['Taped', 'Teipet'], ['Striped', 'Ferdig']], alt: [['White BMW with stripe lines taped on the bonnet', 'Hvit BMW med stripene teipet opp på panseret'], ['The same BMW with black twin stripes', 'Den samme BMW-en med doble svarte striper']] },
+    { b: 'ba-explorer-before.webp', a: 'ba-explorer-after.webp', m: 'fade', pos: '50% 64%', cap: ['Ford Explorer · taped for PPF, then finished', 'Ford Explorer · teipet for PPF, så ferdig'], l: [['Taped', 'Teipet'], ['Finished', 'Ferdig']], alt: [['Black Ford Explorer with green tape around the panels', 'Svart Ford Explorer med grønn teip rundt panelene'], ['The same Ford Explorer after PPF', 'Den samme Ford Exploreren etter PPF']] },
+    { b: 'hood-5050.webp', a: 'hood-5050.webp', m: 'still', pos: '50% 50%', cap: ['Left half polished · right half as it came in', 'Venstre halvdel polert · høyre som den kom inn'], l: [['Polished', 'Polert'], ['Untouched', 'Urørt']], alt: [['Black bonnet, left half polished and right half untouched', 'Svart panser, venstre halvdel polert og høyre urørt'], ['', '']] }
   ];
-  const order = (baBox.dataset.ba || '0,1,2,3').split(',').map(Number);
-  let baI = order[0]; const baR = $('#baRange');
-  const baSet = i => {
-    baI = i; const p = BA[i];
-    $$('#baList [data-ba]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.ba === i));
-    baBox.dataset.mode = p.m; baBox.style.setProperty('--ar', p.ar); baBox.style.setProperty('--x', '50%'); baBox.style.setProperty('--o', 0); baR.value = 50;
-    $('#baB').src = p.b; $('#baB').alt = tx(...p.alt[0]); $('#baA').src = p.a; $('#baA').alt = tx(...p.alt[1]);
-    $('#baLl').textContent = tx(...p.l[0]); $('#baLr').textContent = tx(...p.l[1]); $('#baCap').textContent = tx(...p.cap);
-    $('#baHint').textContent = p.m === 'slide' ? tx('Drag ↔', 'Dra ↔') : p.m === 'fade' ? tx('Tap flip', 'Trykk bytt') : '';
+  const DWELL = 3300, SLIDE = 820;                        /* time on each comparison · the slide to the next one */
+  const SWEEP = [[0, 50], [300, 50], [850, 14], [1600, 86], [2150, 50]];   /* where the line is, over time (ms → %) */
+  const list = $('#baList'), baR = $('#baRange'), Ll = $('#baLl'), Lr = $('#baLr'), B = $('#baB'), A = $('#baA');
+  const btns = list ? $$('[data-ba]', list).filter(x => BA[+x.dataset.ba]) : [];
+  const order = btns.length ? btns.map(x => +x.dataset.ba) : (baBox.dataset.ba || '0,1,2,3').split(',').map(Number).filter(i => BA[i]);
+
+  /* everything that belongs to one comparison sits in a "stage", so it can slide as one piece */
+  const stage = document.createElement('div'); stage.className = 'ba__stage';
+  const bg = document.createElement('div'); bg.className = 'ba__bg'; bg.setAttribute('aria-hidden', 'true');
+  const bgImg = new Image(); bgImg.alt = ''; bgImg.decoding = 'async'; bg.appendChild(bgImg); stage.appendChild(bg);
+  $$('.ba__layer, .ba__label', baBox).forEach(n => stage.appendChild(n));
+  baBox.prepend(stage);
+
+  /* the list: a frame glides to the comparison on show, with a thin timeline along its bottom edge */
+  let frame = null, prog = null, fi = -1;
+  if (list) { frame = document.createElement('span'); frame.className = 'ba__frame no-tr'; frame.setAttribute('aria-hidden', 'true'); prog = document.createElement('i'); prog.className = 'ba__prog'; frame.appendChild(prog); list.appendChild(frame); }
+  const frameTo = i => {
+    if (!frame) return; const b = btns.find(x => +x.dataset.ba === i); if (!b) return; fi = i;
+    const cs = getComputedStyle(list), fb = parseFloat(cs.getPropertyValue('--fb')) || 0, ft = parseFloat(cs.getPropertyValue('--ft')) || 0;
+    frame.style.setProperty('--fx', (b.offsetLeft - fb) + 'px'); frame.style.setProperty('--fy', (b.offsetTop - ft) + 'px');
+    frame.style.setProperty('--fw', (b.offsetWidth + 2 * fb) + 'px'); frame.style.setProperty('--fh', (b.offsetHeight + ft) + 'px');
   };
-  const list = $('#baList'); if (list) list.addEventListener('click', e => { const b = e.target.closest('[data-ba]'); if (b) { baBox._touched = true; baSet(+b.dataset.ba); } });
-  baR.addEventListener('input', () => { baBox._touched = true; baBox.style.setProperty('--x', baR.value + '%'); });
-  $('#baFlip').addEventListener('click', () => { const on = baBox.style.getPropertyValue('--o') === '1'; baBox.style.setProperty('--o', on ? 0 : 1); $('#baLl').style.opacity = on ? 1 : .35; $('#baLr').style.opacity = on ? .35 : 1; });
-  baSet(baI);
-  if (!RM) new IntersectionObserver((es, o) => es.forEach(e => {
-    if (!e.isIntersecting) return; o.disconnect();
-    const seq = [50, 18, 82, 50]; let i = 0, from = 50, t0 = 0;
-    const go = t => { if (baBox._touched || BA[baI].m !== 'slide') return; if (!t0) t0 = t; const p = Math.min(1, (t - t0) / 950), e2 = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2, v = from + (seq[i + 1] - from) * e2; baBox.style.setProperty('--x', v + '%'); baR.value = v; if (p >= 1) { i++; from = seq[i]; t0 = 0; if (i >= seq.length - 1) return; } requestAnimationFrame(go); };
-    setTimeout(() => requestAnimationFrame(go), 500);
-  }), { threshold: .6 }).observe(baBox);
+  const setProg = v => { if (prog) prog.style.setProperty('--p', v.toFixed(4)); };
+  if (frame && window.ResizeObserver) new ResizeObserver(() => { frame.classList.add('no-tr'); frameTo(fi); void frame.offsetWidth; frame.classList.remove('no-tr'); }).observe(list);
+
+  /* the comparison itself */
+  const setX = v => { const x = v.toFixed(2) + '%'; baBox.style.setProperty('--x', x); stage.style.setProperty('--x', x); baR.value = v; };
+  let flipped = false;
+  const flip = on => { flipped = on; stage.style.setProperty('--o', on ? 1 : 0); Ll.style.opacity = on ? .35 : 1; Lr.style.opacity = on ? 1 : .35; };
+  let baI = -1, cur = null;
+  const apply = i => {
+    baI = i; cur = BA[i];
+    btns.forEach(x => x.setAttribute('aria-pressed', +x.dataset.ba === i));
+    baBox.dataset.mode = stage.dataset.mode = cur.m; baBox.dataset.fit = stage.dataset.fit = cur.fit || 'cover';
+    B.src = cur.b; B.alt = tx(...cur.alt[0]); A.src = cur.a; A.alt = tx(...cur.alt[1]);
+    [B, A].forEach(im => { im.style.objectPosition = cur.pos || ''; });
+    if (cur.fit === 'contain') bgImg.src = cur.b; else bgImg.removeAttribute('src');
+    Ll.textContent = tx(...cur.l[0]); Lr.textContent = tx(...cur.l[1]); $('#baCap').textContent = tx(...cur.cap);
+    $('#baHint').textContent = cur.m === 'slide' ? tx('Drag ↔', 'Dra ↔') : cur.m === 'fade' ? tx('Tap flip', 'Trykk bytt') : '';
+    setX(50);
+    if (cur.m === 'fade') flip(false); else { flipped = false; stage.style.setProperty('--o', 0); Ll.style.opacity = Lr.style.opacity = ''; }
+    frameTo(i);
+  };
+  const loaded = p => Promise.race([
+    Promise.all([p.b, p.a].map(src => { const im = new Image(); im.src = src; return im.decode ? im.decode().catch(() => {}) : new Promise(r => { im.onload = im.onerror = r; }); })),
+    new Promise(r => setTimeout(r, 2500))
+  ]);
+
+  /* the clock: time only runs while nothing is holding it, so the timeline freezes exactly where it was */
+  let t = 0, last = 0, raf = 0, moving = false, stopped = RM, took = false, seen = false, queued = null;
+  const hold = new Set(['off']);
+  const running = () => !stopped && !hold.size && !moving;
+  const ease = p => p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+  const choreo = () => {
+    if (took || !cur) return;
+    if (cur.m === 'slide') { let k = 1; while (k < SWEEP.length - 1 && t > SWEEP[k][0]) k++; const [t0, v0] = SWEEP[k - 1], [t1, v1] = SWEEP[k]; setX(v0 + (v1 - v0) * ease(Math.min(1, Math.max(0, (t - t0) / (t1 - t0))))); }
+    else if (cur.m === 'fade') { const on = t > 1100; if (on !== flipped) flip(on); }
+  };
+  const loop = now => {
+    raf = 0; if (!running()) { last = 0; return; }
+    if (last) t += Math.min(now - last, 64); last = now;
+    choreo(); setProg(Math.min(1, t / DWELL));
+    if (t >= DWELL) { next(); return; }
+    raf = requestAnimationFrame(loop);
+  };
+  const kick = () => { if (!raf && running()) { last = 0; raf = requestAnimationFrame(loop); } };
+  const warm = () => { const n = BA[order[(order.indexOf(baI) + 1) % order.length]]; if (n) [n.b, n.a].forEach(src => { const im = new Image(); im.src = src; }); };
+  const arrive = () => { t = 0; last = 0; setProg(0); if (running()) setTimeout(warm, 500); kick(); };
+
+  /* the move: the next comparison slides in over the last one (which drifts back and dims), leading with the red/blue edge */
+  const go = async (i, d) => {
+    if (moving) { queued = [i, d]; return; }          /* picked mid-slide: goes there as soon as this one lands */
+    if (i === baI || !BA[i]) return;
+    moving = true; frameTo(i); setProg(0);
+    await loaded(BA[i]);
+    if (RM || !stage.animate || hold.has('off') || hold.has('hidden')) { apply(i); moving = false; if (queued) { const [qi, qd] = queued; queued = null; if (qi !== baI) { go(qi, qd); return; } } arrive(); return; }
+    const ghost = stage.cloneNode(true); ghost.classList.add('ba__ghost'); ghost.setAttribute('aria-hidden', 'true');
+    $$('[id]', ghost).forEach(n => n.removeAttribute('id')); $$('img', ghost).forEach(im => { im.alt = ''; });
+    stage.before(ghost); apply(i);
+    baBox.classList.add('is-moving'); baBox.classList.toggle('is-back', d < 0);
+    const o = { duration: SLIDE, easing: 'cubic-bezier(.7,0,.25,1)' };
+    const run = stage.animate([{ transform: `translateX(${d < 0 ? -100 : 100}%)` }, { transform: 'none' }], o);
+    ghost.animate([{ transform: 'none', filter: 'brightness(1)' }, { transform: `translateX(${d < 0 ? 32 : -32}%)`, filter: 'brightness(.4)' }], { ...o, fill: 'forwards' });
+    try { await run.finished; } catch (e) {}
+    ghost.remove(); baBox.classList.remove('is-moving', 'is-back'); moving = false;
+    if (queued) { const [qi, qd] = queued; queued = null; if (qi !== baI) { go(qi, qd); return; } }
+    arrive();
+  };
+  const next = () => go(order[(order.indexOf(baI) + 1) % order.length], 1);
+
+  /* Pause / Play */
+  const capHint = $('#baHint'); let auto = null;
+  if (capHint && order.length > 1) {
+    const wrapR = document.createElement('span'); wrapR.className = 'ba__capr'; capHint.before(wrapR); wrapR.appendChild(capHint);
+    auto = document.createElement('button'); auto.type = 'button'; auto.className = 'ba__auto'; auto.setAttribute('aria-controls', 'baBox');
+    auto.innerHTML = '<i aria-hidden="true"></i><span></span>'; wrapR.appendChild(auto);
+    auto.addEventListener('click', () => {
+      if (stopped) { stopped = false; took = false; t = 0; if (cur && cur.m === 'slide') setX(50); if (cur && cur.m === 'fade') flip(false); }
+      else stopped = true;
+      ui(); kick();
+    });
+  }
+  const ui = () => {
+    if (auto) { auto.dataset.state = stopped ? 'paused' : 'playing'; $('span', auto).textContent = stopped ? tx('Play', 'Spill av') : tx('Pause', 'Pause'); }
+    if (frame) frame.classList.toggle('is-still', stopped);
+    if (stopped) setProg(0);
+  };
+  const takeOver = () => { took = true; if (!stopped) { stopped = true; ui(); } };
+
+  if (list) list.addEventListener('click', e => { const b = e.target.closest('[data-ba]'); if (!b) return; const i = +b.dataset.ba; if (i === baI && !moving) return; go(i, order.indexOf(i) > order.indexOf(baI) ? 1 : -1); });
+  baR.addEventListener('input', e => { if (e.isTrusted) takeOver(); setX(+baR.value); });
+  $('#baFlip').addEventListener('click', e => { if (e.isTrusted) takeOver(); flip(!flipped); });
+
+  /* what holds the clock */
+  const setHold = (k, on) => { if (on) hold.add(k); else { hold.delete(k); kick(); } };
+  const hov = new Set();
+  [baBox, list].filter(Boolean).forEach(el => {
+    el.addEventListener('pointerenter', e => { if (e.pointerType !== 'mouse') return; hov.add(el); setHold('hover', true); });
+    el.addEventListener('pointerleave', () => { hov.delete(el); if (!hov.size) setHold('hover', false); });
+  });
+  const zone = baBox.closest('.ba__grid') || baBox.parentNode;
+  zone.addEventListener('focusin', e => { if (e.target.matches(':focus-visible')) setHold('focus', true); });
+  zone.addEventListener('focusout', () => setTimeout(() => { if (!zone.contains(document.activeElement) || !document.activeElement.matches(':focus-visible')) setHold('focus', false); }, 0));
+  document.addEventListener('visibilitychange', () => setHold('hidden', document.hidden));
+  new IntersectionObserver(es => es.forEach(e => { const on = e.isIntersecting && e.intersectionRatio >= .35; if (on && !seen) { seen = true; t = 0; } setHold('off', !on); }), { threshold: [0, .35, .6] }).observe(baBox);
+
+  apply(order[0]); ui();
+  if (frame) requestAnimationFrame(() => { frameTo(baI); requestAnimationFrame(() => frame.classList.remove('no-tr')); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => frameTo(baI));
 }
 
 /* ---------- gallery ---------- */
